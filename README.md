@@ -30,16 +30,18 @@ The attack have two module.
 
    ```bash
    pip install -r requirements.txt
+   ```
    
 ## Usage
    ```bash
    python proposed_attack_model.py
+   ```
 
 ## Flowchart
 
 Check out the flowchart PDF in the [flowchart folder](./flowchart/).
 
-![Flowchart](./flowchart/Graph_Attack_Module.pdf)
+[![Flowchart](./flowchart/Graph_Attack_Module.pdf)](./flowchart/Graph_Attack_Module.pdf)
 
 
 
