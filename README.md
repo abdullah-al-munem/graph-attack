@@ -8,9 +8,8 @@ Graph Attack is a Python project that implements a proposed attack model on grap
 - [Features](#features)
 - [Installation](#installation)
 - [Usage](#usage)
-- [Contributing](#contributing)
-- [License](#license)
-- [Contact](#contact)
+- [Flowchart](#flowchart)
+
 
 ## Introduction
 
@@ -33,6 +32,15 @@ The attack have two module.
    pip install -r requirements.txt
    
 ## Usage
-  ```bash
-  python proposed_attack_model.py
+   ```bash
+   python proposed_attack_model.py
+
+## Flowchart
+
+Check out the flowchart PDF in the [flowchart folder](./flowchart/).
+
+![Flowchart](./flowchart/Graph_Attack_Module.pdf)
+
+
+
 
