@@ -41,7 +41,7 @@ The attack have two module.
 
 Check out the flowchart PDF in the [flowchart folder](./flowchart/).
 
-[![Flowchart](./flowchart/Graph_Attack_Module.pdf)](./flowchart/Graph_Attack_Module.pdf)
+[![Flowchart](./flowchart/Graph_Attack_Module.png)](./flowchart/Graph_Attack_Module.pdf)
 
 
 
