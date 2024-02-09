@@ -34,12 +34,16 @@ The attack have two module.
    nvidia-smi
    ```
    [![Images](./images/nvidia_smi.png)](./images/nvidia_smi.png)
-5. **Dependencies**: Install the project dependencies by running the following command:
-
+4. Select the appropriate PyTorch version from [PyTorch's official website](https://pytorch.org/get-started/locally/).
+   [![Images](./images/pytorch_get_started.png)](./images/pytorch_get_started.png)
+5. Install the PyTorch separately using the selected command:
+   ```bash
+   pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+   ```
+7. **Dependencies**: Install rest of the project dependencies by running the following command:
    ```bash
    pip install -r requirements.txt
    ```
-   
    
 ## Usage
    ```bash
