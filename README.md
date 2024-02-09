@@ -31,13 +31,13 @@ The attack have two module.
    ```
 3. Check the appropriate CUDA version if you have nvidia GPU:
    ```bash
-   pip install -r requirements.txt
+   nvidia-smi
    ```
-   
+   [(./images/Graph_Attack_Module.png)]
 5. **Dependencies**: Install the project dependencies by running the following command:
 
    ```bash
-   nvidia-smi
+   pip install -r requirements.txt
    ```
    
    
