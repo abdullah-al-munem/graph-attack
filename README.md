@@ -57,7 +57,7 @@ The attack have two module.
    ```
 4. To perform **all the attacks**, run the following command:
    ```bash
-    perform_all_attacks.py
+    python perform_all_attacks.py
    ```
 
 ## Flowchart
