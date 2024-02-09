@@ -6,7 +6,7 @@ import ast
 
 from utils import get_dataset_from_deeprobust, get_target_node_list, get_miss_classification_original_dataset
 from proposed_attack_model import start_attack_proposed_model
-from state_of_the_art_attack_models import start_attack_RND, start_attack_FGA, start_attack_Nettack
+from state_of_the_art_attack_models import start_attack_RND, start_attack_FGA, start_attack_Nettack, start_attack_SGAttack, start_attack_IGAttack
 
 warnings.simplefilter('ignore')
 
@@ -73,7 +73,7 @@ if __name__ == "__main__":
     for time in range(1, times+1):
         # print(f"Running attacks for {time} time(s)......")
         # print(f"Proposed model started...")
-        flg_proposed, flg_random, flg_fga, flg_nettack = 1, 1, 1, 1
+        flg_proposed, flg_random, flg_fga, flg_nettack, flg_sgattack = 1, 1, 1, 1, 1
         csv_file_list = [file for file in file_list if ('.csv' in  file) and (str(time) in file)]
 
         for file in csv_file_list:
@@ -88,10 +88,12 @@ if __name__ == "__main__":
                 flg_fga = 0
             if _time == time and _model.lower() == 'nettack':
                 flg_nettack = 0
+            if _time == time and _model.lower() == 'sgattack':
+                flg_sgattack = 0
 
         logger.info(f"Running attacks for {time} time(s)......")
 
-        if not (flg_proposed or flg_random or flg_fga or flg_nettack):
+        if not (flg_proposed or flg_random or flg_fga or flg_nettack or flg_sgattack):
             continue
 
         if (not flg_proposed) or (not flg_random) or (not flg_fga) or (not flg_nettack):
@@ -128,5 +130,9 @@ if __name__ == "__main__":
         if flg_nettack:
             logger.info(f"Nettack has started...")
             start_attack_Nettack(dataset, defense_model, budget_range, node_list, time)
+        
+        if flg_sgattack:
+            logger.info(f"SGAttack attack has started...")
+            start_attack_SGAttack(dataset, defense_model, budget_range, node_list, time)
 
 
