@@ -33,7 +33,7 @@ The attack have two module.
    ```bash
    nvidia-smi
    ```
-   [(./images/Graph_Attack_Module.png)]
+   [![Images](./images/nvidia_smi.png)](./images/nvidia_smi.png)
 5. **Dependencies**: Install the project dependencies by running the following command:
 
    ```bash
