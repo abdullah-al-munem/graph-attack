@@ -24,13 +24,22 @@ The attack have two module.
 
 ## Installation
 
-1. **Python Version**: This project requires Python 3.8.0. If you don't have it installed, you can download it from [Python's official website](https://www.python.org/downloads/release/python-380/).
-
-2. **Dependencies**: Install the project dependencies by running the following command:
-
+1. **Python Version**: This project requires Python **3.8.0**. If you don't have it installed, you can download it from [Python's official website](https://www.python.org/downloads/release/python-380/).
+2. Create a virtual environment using the following command:
+   ```bash
+    py -3.8 -m venv venv2
+   ```
+3. Check the appropriate CUDA version if you have nvidia GPU:
    ```bash
    pip install -r requirements.txt
    ```
+   
+5. **Dependencies**: Install the project dependencies by running the following command:
+
+   ```bash
+   nvidia-smi
+   ```
+   
    
 ## Usage
    ```bash
