@@ -27,7 +27,7 @@ The attack have two module.
 1. **Python Version**: This project requires Python **3.8.0**. If you don't have it installed, you can download it from [Python's official website](https://www.python.org/downloads/release/python-380/).
 2. Create a virtual environment using the following command:
    ```bash
-    py -3.8 -m venv venv2
+    py -3.8 -m venv attack_venv
    ```
 3. Check the appropriate CUDA version if you have nvidia GPU:
    ```bash
@@ -46,8 +46,18 @@ The attack have two module.
    ```
    
 ## Usage
+1. Activate the virtual environment.
+2. To perform the **proposed attack**, run the following command:
    ```bash
-   python proposed_attack_model.py
+    python proposed_attack_model.py
+   ```
+3. To perform a single **state of the art** attack, use **state_of_the_art_attack_models.py** script and edit accordingly.
+    ```bash
+    python state_of_the_art_attack_models.py
+   ```
+4. To perform **all the attacks**, run the following command:
+   ```bash
+    perform_all_attacks.py
    ```
 
 ## Flowchart
