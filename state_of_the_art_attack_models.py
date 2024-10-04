@@ -48,7 +48,7 @@ device = get_device()
 def start_attack_RND(dataset, defense_model, budget_range, node_list, times=1):
     data = get_dataset_from_deeprobust(dataset)
     adj, features, labels, idx_train, idx_val, idx_test = destructuring_dataset(data)
-
+    # pyg_data = Dpr2Pyg(data)
     acc_list = []
     acc_node = {}
 
@@ -66,7 +66,8 @@ def start_attack_RND(dataset, defense_model, budget_range, node_list, times=1):
 
             modified_adj = model_attack.modified_adj
 
-            accuracy = predict(modified_adj, target_node, dataset, is_torch_geometric=False)
+            accuracy = predict(modified_adj, features, data, target_node)
+
             print("accuracy = ", accuracy)
             if accuracy == 0:
                 curr_acc[0].append(target_node)
@@ -106,7 +107,6 @@ def start_attack_RND(dataset, defense_model, budget_range, node_list, times=1):
 def start_attack_FGA(dataset, defense_model, budget_range, node_list, times=1):
     data = get_dataset_from_deeprobust(dataset)
     adj, features, labels, idx_train, idx_val, idx_test = destructuring_dataset(data)
-
     acc_list = []
     acc_node = {}
 
@@ -126,7 +126,7 @@ def start_attack_FGA(dataset, defense_model, budget_range, node_list, times=1):
 
             modified_adj = model_attack.modified_adj
 
-            accuracy = predict(modified_adj, target_node, dataset, is_torch_geometric=False)
+            accuracy = predict(modified_adj, features, data, target_node)
             print("accuracy = ", accuracy)
             if accuracy == 0:
                 curr_acc[0].append(target_node)
@@ -166,7 +166,6 @@ def start_attack_FGA(dataset, defense_model, budget_range, node_list, times=1):
 def start_attack_Nettack(dataset, defense_model, budget_range, node_list, times=1):
     data = get_dataset_from_deeprobust(dataset)
     adj, features, labels, idx_train, idx_val, idx_test = destructuring_dataset(data)
-
     acc_list = []
     acc_node = {}
 
@@ -186,7 +185,7 @@ def start_attack_Nettack(dataset, defense_model, budget_range, node_list, times=
 
             modified_adj = model_attack.modified_adj
 
-            accuracy = predict(modified_adj, target_node, dataset, is_torch_geometric=False)
+            accuracy = predict(modified_adj, features, data, target_node)
             print("accuracy = ", accuracy)
             if accuracy == 0:
                 curr_acc[0].append(target_node)
@@ -225,6 +224,7 @@ def start_attack_Nettack(dataset, defense_model, budget_range, node_list, times=
 def start_attack_SGAttack(dataset, defense_model, budget_range, node_list, times=1):
     data = get_dataset_from_deeprobust(dataset)
     adj, features, labels, idx_train, idx_val, idx_test = destructuring_dataset(data)
+    pyg_data = Dpr2Pyg(data)
 
     acc_list = []
     acc_node = {}
@@ -242,15 +242,16 @@ def start_attack_SGAttack(dataset, defense_model, budget_range, node_list, times
                 nclass=labels.max().item() + 1, K=2,
                 lr=0.01, device=device).to(device)
             
-            pyg_data = Dpr2Pyg(data)
             surrogate.fit(pyg_data, verbose=False, patience=30, train_iters=100)  
             model_attack = SGAttack(surrogate, attack_structure=True, attack_features=False, device=device)
             model_attack = model_attack.to(device)
             model_attack.attack(features, adj, labels, target_node, budget, direct=True)
 
             modified_adj = model_attack.modified_adj
+            # pyg_data = Dpr2Pyg(data)
+            # print(pyg_data)
 
-            accuracy = predict(modified_adj, target_node, dataset, is_torch_geometric=False)
+            accuracy = predict(modified_adj, features, data, target_node)
             print("accuracy = ", accuracy)
             if accuracy == 0:
                 curr_acc[0].append(target_node)
@@ -290,7 +291,6 @@ def start_attack_SGAttack(dataset, defense_model, budget_range, node_list, times
 def start_attack_IGAttack(dataset, defense_model, budget_range, node_list, times=1):
     data = get_dataset_from_deeprobust(dataset)
     adj, features, labels, idx_train, idx_val, idx_test = destructuring_dataset(data)
-
     acc_list = []
     acc_node = {}
 
@@ -316,7 +316,7 @@ def start_attack_IGAttack(dataset, defense_model, budget_range, node_list, times
 
             modified_adj = model_attack.modified_adj
 
-            accuracy = predict(modified_adj, target_node, dataset, is_torch_geometric=False)
+            accuracy = predict(modified_adj, features, data, target_node)
             print("accuracy = ", accuracy)
             if accuracy == 0:
                 curr_acc[0].append(target_node)

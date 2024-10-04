@@ -40,26 +40,30 @@ if __name__ == "__main__":
 
     1. cora-gcn (done.)
     2. cora-gin (done.)
-    3. cora-gat
-    4. cora-graphsage
+    3. cora-rgcn  (done.)
+    4. cora-graphsage (done.)
 
     5. citeseer-gcn (done.)
-    6. citeseer-gin
-    7. citeseer-gat
-    8. citeseer-graphsage
+    6. citeseer-gin (done.)
+    7. citeseer-rgcn
+    8. citeseer-graphsage (done.)
 
-    9. polblogs-gcn (ruunning....)
-    10. polblogs-gin
-    11. polblogs-gat
-    12. polblogs-graphsage
+    9. polblogs-gcn (done.)
+    10. polblogs-gin (done.)
+    11. polblogs-rgcn (done.)
+    12. polblogs-graphsage (done)
+
+    13. ogbn-gcn (running...)
+    14. ogbn-gin
+    15. ogbn-graphsage
     '''
 
-    defense_model_list = ['gcn', 'gin', 'gat', 'graphsage']
-    dataset_list = ['cora', 'citeseer', 'polblogs']
+    defense_model_list = ['gcn', 'gin', 'gat', 'graphsage', 'rgcn', 'mdgcn', 'jacgcn', 'svdgcn']
+    dataset_list = ['cora', 'citeseer', 'polblogs', 'ogbn-arxiv', 'pubmed', 'BlogCatalog']
 
     surrogate_model = 'gcn'
-    dataset = 'polblogs'
-    defense_model = 'gcn'
+    dataset = 'cora'
+    defense_model = 'mdgcn'
 
     data = get_dataset_from_deeprobust(dataset=dataset)
     print("Dataset loaded...")
@@ -92,7 +96,7 @@ if __name__ == "__main__":
                 flg_sgattack = 0
 
         logger.info(f"Running attacks for {time} time(s)......")
-
+        # "ugba, RGCN"
         if not (flg_proposed or flg_random or flg_fga or flg_nettack or flg_sgattack):
             continue
 
@@ -113,7 +117,7 @@ if __name__ == "__main__":
         # print("Targegt nodes are being selected...")
         logger.info(f"Targegt nodes are being selected...")
 
-        get_miss_classification_original_dataset(defense_model, dataset, node_list, time)
+        # get_miss_classification_original_dataset(defense_model, dataset, node_list, time)
 
         if flg_proposed:
             logger.info(f"Proposed model attack has started...")

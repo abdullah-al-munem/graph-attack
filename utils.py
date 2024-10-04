@@ -1,3 +1,4 @@
+import os
 import warnings
 import torch
 import numpy as np
@@ -6,7 +7,10 @@ import json
 from deeprobust.graph.defense import GCN
 
 from deeprobust.graph.data import Dataset
-from predict import test_GCN, test_GAT, test_GIN, test_GraphSAGE
+from predict import test_GCN, test_GAT, test_GIN, test_GraphSAGE, test_RGCN, test_acc_GCN, test_acc_GIN, test_acc_GSAGE, test_acc_RGCN, test_acc_MDGCN, test_acc_JacGCN, test_acc_SVDGCN
+
+from ogb.nodeproppred import PygNodePropPredDataset
+from deeprobust.graph.data import Pyg2Dpr, Dpr2Pyg
 
 warnings.simplefilter('ignore')
 
@@ -31,7 +35,11 @@ def get_device():
 device = get_device()
 
 def get_dataset_from_deeprobust(dataset):
-    data = Dataset(root=r'./', name=dataset) 
+    if dataset == 'ogbn-arxiv':
+        pyg_data = PygNodePropPredDataset(name=dataset)
+        data = Pyg2Dpr(pyg_data)
+    else:
+        data = Dataset(root=r'./', name=dataset) 
     return data
 
 def destructuring_dataset(data):
@@ -41,10 +49,13 @@ def destructuring_dataset(data):
 
 def get_predict_function(defense_model):
     predict_classes = {
-        'gcn': test_GCN,
-        'gin': test_GIN,
-        'gat': test_GAT,
-        'graphsage': test_GraphSAGE
+        'gcn': test_acc_GCN,
+        'gin': test_acc_GIN,
+        'graphsage': test_acc_GSAGE,
+        'rgcn': test_acc_RGCN,
+        'mdgcn': test_acc_MDGCN,
+        'jacgcn': test_acc_JacGCN,
+        'svdgcn': test_acc_SVDGCN
     }
     return predict_classes[defense_model]
 
@@ -110,15 +121,21 @@ def get_target_node_list(data):
     return target_node_list
 
 def get_miss_classification_original_dataset(defense_model, dataset, node_list, time=1):
+
+    file_path = f"./miss_classification_rate_{dataset}_{defense_model}_{time}"
+    if os.path.exists(file_path):
+        return
+
     data = get_dataset_from_deeprobust(dataset)
     adj, features, labels, idx_train, idx_val, idx_test = destructuring_dataset(data)
-
+    # print(data)
     predict = get_predict_function(defense_model)
-
+    pyg_data = Dpr2Pyg(data)
+    
     cnt = 0
     curr_acc = {1:[], 0:[]}
     for target_node in node_list:
-        accuracy = predict(adj, target_node, dataset, is_torch_geometric=False)
+        accuracy = predict(adj, target_node, pyg_data, is_torch_geometric=False)
 
         if accuracy == 0:
             curr_acc[0].append(target_node)
