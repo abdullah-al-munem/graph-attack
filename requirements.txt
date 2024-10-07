@@ -19,7 +19,6 @@ SQLAlchemy==2.0.22
 tensorboardX==2.6.2.2
 tokenizers==0.14.1
 torch
-torch-cluster
 torch-scatter
 torch-sparse
 torch-spline-conv
