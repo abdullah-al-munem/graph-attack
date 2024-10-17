@@ -451,14 +451,7 @@ class ProposedAttack:
 
         for node in top_nodes_from_specific_node:
             return node[0]
-        #     if self.labels[node[0]] != label:
-        #         # print(f'Distance between {target_node} and {node[0]} is {node[1]}')
-        #         return node[0]
 
-        # print(shortest_distances, len(adj))
-        # print(shortest_paths)
-        
-        # print("Nothing found!!")
     def get_nodes_to_connect_by_distance_top_n(self, adj, target_node, N):
         G = nx.Graph()
         G.add_edges_from(adj)
@@ -579,30 +572,10 @@ class ProposedAttack:
 
         score = get_score(edges_list_before_perturbation, updated_edges_tmp)
 
-        # modified_adj_tmp = torch.tensor(updated_edges_tmp).T
-        # modified_adj_2 = sp.csr_matrix((np.ones(modified_adj_tmp.shape[1]),
-        #                             (modified_adj_tmp[0], modified_adj_tmp[1])), shape=(n, n))
-        
-        # adj_norm = normalize_adj(modified_adj_2)
-
-        # modified_features = features2.copy()
-        # logits = (adj_norm @ adj_norm @ modified_features @ self.W )[target_node]
-        # label_u = labels[target_node]
-        
-        # label_target_onehot = np.eye(int(nclass))[labels[target_node]]
-        # best_wrong_class = (logits - 1000*label_target_onehot).argmax()
-        # surrogate_losses = [logits[labels[target_node]] - logits[best_wrong_class]]
-        
-        # return updated_edges_tmp, surrogate_losses
         return updated_edges_tmp, score
     
     def get_highest_loss_edge_after_remove(self, final_prune_list, updated_edges, target_node):
         updated_edges_tmp_2 = updated_edges.copy()
-        # G = nx.Graph()
-        # G.add_edges_from(updated_edges_tmp_2)
-        # degree = dict(nx.degree(G))
-        # if degree[target_node] < 2:
-        #     return []
         
         final_prune_list_with_loss = [list(val) for val in final_prune_list]
         for i in range(len(final_prune_list_with_loss)):
@@ -646,39 +619,6 @@ class ProposedAttack:
                 updated_edges_tmp_2.remove(edge_to_remove_2)
             except:
                 pass
-
-            # G = nx.Graph()
-            # G.add_edges_from(updated_edges_tmp_2)
-            # degree = dict(nx.degree(G))
-            # if degree[target_node] < 1:
-            #     return []
-
-            # Check if the graph is connected
-            # is_connected = nx.is_connected(G)
-            
-            # assert is_connected, "Graph is disconnected."
-            # if not is_connected:
-            #     updated_edges_tmp_2 = updated_edges.copy()
-            #     continue
-
-
-            # After perturbation 
-
-            # modified_adj_tmp = torch.tensor(updated_edges_tmp_2).T
-            # modified_adj_2 = sp.csr_matrix((np.ones(modified_adj_tmp.shape[1]),
-            #                             (modified_adj_tmp[0], modified_adj_tmp[1])), shape=(n, n))
-            
-            # adj_norm = normalize_adj(modified_adj_2)
-
-            # modified_features = features2.copy()
-            # logits = (adj_norm @ adj_norm @ modified_features @ self.W )[target_node]
-            # label_u = labels[target_node]
-            
-            # label_target_onehot = np.eye(int(nclass))[labels[target_node]]
-            # best_wrong_class = (logits - 1000*label_target_onehot).argmax()
-            # surrogate_losses = [logits[labels[target_node]] - logits[best_wrong_class]]
-
-            # final_prune_list_with_loss[idx][2] = surrogate_losses[0]
 
             score = get_score(edges_list_before_perturbation, updated_edges_tmp_2)
 
@@ -815,17 +755,6 @@ def start_attack_proposed_model(surrogate_model, dataset, defense_model, budget_
 
     # Convert lists back to tuples
     important_edge_list = [tuple(item) for item in important_edge_list_dict[dataset]]
-
-    # proposed_model = ProposedAttack(surrogate_model, dataset, defense_model)
-    # important_edge_list = proposed_model.get_important_edge_list()
-
-    # predict_classes = {
-    #         'gcn': test_GCN,
-    #         'gin': test_GIN,
-    #         'gat': test_GAT,
-    #         'graphsage': test_GraphSAGE
-    #     }
-    # predict = predict_classes[defense_model]
 
     already_misclassified = set()
 
