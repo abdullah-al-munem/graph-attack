@@ -1,0 +1,108 @@
+2024-10-20 13:05:41,063 - proposed_attack_model - INFO - The attack has been started...
+2024-10-20 13:05:41,094 - __main__ - INFO - All attacks has been started...
+2024-10-20 13:05:41,346 - urllib3.connectionpool - DEBUG - https://pypi.python.org:443 "GET /pypi/outdated/json HTTP/11" 301 122
+2024-10-20 13:05:41,362 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): pypi.org:443
+2024-10-20 13:05:41,378 - __main__ - INFO - Running attacks for 1 time(s)......
+2024-10-20 13:05:41,402 - urllib3.connectionpool - DEBUG - https://pypi.org:443 "GET /pypi/ogb/json HTTP/11" 200 8872
+2024-10-20 13:05:41,535 - urllib3.connectionpool - DEBUG - https://pypi.org:443 "GET /pypi/outdated/json HTTP/11" 200 3703
+2024-10-20 13:05:42,555 - __main__ - INFO - Node list: [929, 1554, 2406, 1342, 1504, 1163, 1347, 1820, 2082, 1185, 2469, 2459, 1370, 2391, 537, 1683, 2255, 111, 1927, 2397, 2356, 2470, 1081, 921, 2002, 1928, 2293, 2312, 925, 2064, 2476, 910, 1823, 1373, 1073, 2464, 298, 686, 426, 1114]
+2024-10-20 13:05:42,555 - __main__ - INFO - Targegt nodes are being selected...
+2024-10-20 13:05:42,555 - __main__ - INFO - Proposed model attack has started...
+2024-10-20 13:05:42,885 - proposed_attack_model - INFO - For budget number: 1
+2024-10-20 13:05:42,885 - proposed_attack_model - INFO - Target node: 929
+2024-10-20 13:05:43,089 - fsspec.local - DEBUG - open file: C:/Users/Azharul Islam/Desktop/New folder (2)/graph-attack/data/processed/pre_transform.pt
+2024-10-20 13:05:43,089 - fsspec.local - DEBUG - open file: C:/Users/Azharul Islam/Desktop/New folder (2)/graph-attack/data/processed/pre_filter.pt
+2024-10-20 13:05:44,894 - proposed_attack_model - INFO - added: 1, removed: 0
+2024-10-20 13:05:44,911 - fsspec.local - DEBUG - open file: C:/Users/Azharul Islam/Desktop/New folder (2)/graph-attack/data/processed/pre_transform.pt
+2024-10-20 13:05:44,911 - fsspec.local - DEBUG - open file: C:/Users/Azharul Islam/Desktop/New folder (2)/graph-attack/data/processed/pre_filter.pt
+2024-10-20 13:06:58,337 - proposed_attack_model - INFO - accuracy: True
+2024-10-20 13:06:58,337 - proposed_attack_model - INFO - Target node: 1554
+2024-10-20 13:06:58,628 - fsspec.local - DEBUG - open file: C:/Users/Azharul Islam/Desktop/New folder (2)/graph-attack/data/processed/pre_transform.pt
+2024-10-20 13:06:58,629 - fsspec.local - DEBUG - open file: C:/Users/Azharul Islam/Desktop/New folder (2)/graph-attack/data/processed/pre_filter.pt
+2024-10-20 13:07:04,872 - proposed_attack_model - INFO - added: 1, removed: 0
+2024-10-20 13:07:04,876 - fsspec.local - DEBUG - open file: C:/Users/Azharul Islam/Desktop/New folder (2)/graph-attack/data/processed/pre_transform.pt
+2024-10-20 13:07:04,876 - fsspec.local - DEBUG - open file: C:/Users/Azharul Islam/Desktop/New folder (2)/graph-attack/data/processed/pre_filter.pt
+2024-10-20 13:08:19,022 - proposed_attack_model - INFO - accuracy: True
+2024-10-20 13:08:19,022 - proposed_attack_model - INFO - Target node: 2406
+2024-10-20 13:08:19,286 - fsspec.local - DEBUG - open file: C:/Users/Azharul Islam/Desktop/New folder (2)/graph-attack/data/processed/pre_transform.pt
+2024-10-20 13:08:19,286 - fsspec.local - DEBUG - open file: C:/Users/Azharul Islam/Desktop/New folder (2)/graph-attack/data/processed/pre_filter.pt
+2024-10-20 13:08:21,237 - proposed_attack_model - INFO - added: 0, removed: 1
+2024-10-20 13:08:21,252 - fsspec.local - DEBUG - open file: C:/Users/Azharul Islam/Desktop/New folder (2)/graph-attack/data/processed/pre_transform.pt
+2024-10-20 13:08:21,252 - fsspec.local - DEBUG - open file: C:/Users/Azharul Islam/Desktop/New folder (2)/graph-attack/data/processed/pre_filter.pt
+2024-10-20 13:09:37,331 - proposed_attack_model - INFO - accuracy: True
+2024-10-20 13:09:37,331 - proposed_attack_model - INFO - Target node: 1342
+2024-10-20 13:09:37,580 - fsspec.local - DEBUG - open file: C:/Users/Azharul Islam/Desktop/New folder (2)/graph-attack/data/processed/pre_transform.pt
+2024-10-20 13:09:37,580 - fsspec.local - DEBUG - open file: C:/Users/Azharul Islam/Desktop/New folder (2)/graph-attack/data/processed/pre_filter.pt
+2024-10-20 13:09:39,132 - proposed_attack_model - INFO - added: 1, removed: 0
+2024-10-20 13:09:39,150 - fsspec.local - DEBUG - open file: C:/Users/Azharul Islam/Desktop/New folder (2)/graph-attack/data/processed/pre_transform.pt
+2024-10-20 13:09:39,150 - fsspec.local - DEBUG - open file: C:/Users/Azharul Islam/Desktop/New folder (2)/graph-attack/data/processed/pre_filter.pt
+2024-10-20 13:10:55,218 - proposed_attack_model - INFO - accuracy: True
+2024-10-20 13:10:55,218 - proposed_attack_model - INFO - Target node: 1504
+2024-10-20 13:10:55,605 - fsspec.local - DEBUG - open file: C:/Users/Azharul Islam/Desktop/New folder (2)/graph-attack/data/processed/pre_transform.pt
+2024-10-20 13:10:55,607 - fsspec.local - DEBUG - open file: C:/Users/Azharul Islam/Desktop/New folder (2)/graph-attack/data/processed/pre_filter.pt
+2024-10-20 13:10:57,430 - proposed_attack_model - INFO - added: 1, removed: 0
+2024-10-20 13:10:57,448 - fsspec.local - DEBUG - open file: C:/Users/Azharul Islam/Desktop/New folder (2)/graph-attack/data/processed/pre_transform.pt
+2024-10-20 13:10:57,448 - fsspec.local - DEBUG - open file: C:/Users/Azharul Islam/Desktop/New folder (2)/graph-attack/data/processed/pre_filter.pt
+2024-10-20 13:12:12,740 - proposed_attack_model - INFO - accuracy: True
+2024-10-20 13:12:12,741 - proposed_attack_model - INFO - Target node: 1163
+2024-10-20 13:12:13,020 - fsspec.local - DEBUG - open file: C:/Users/Azharul Islam/Desktop/New folder (2)/graph-attack/data/processed/pre_transform.pt
+2024-10-20 13:12:13,021 - fsspec.local - DEBUG - open file: C:/Users/Azharul Islam/Desktop/New folder (2)/graph-attack/data/processed/pre_filter.pt
+2024-10-20 13:12:14,856 - proposed_attack_model - INFO - added: 1, removed: 0
+2024-10-20 13:12:14,868 - fsspec.local - DEBUG - open file: C:/Users/Azharul Islam/Desktop/New folder (2)/graph-attack/data/processed/pre_transform.pt
+2024-10-20 13:12:14,869 - fsspec.local - DEBUG - open file: C:/Users/Azharul Islam/Desktop/New folder (2)/graph-attack/data/processed/pre_filter.pt
+2024-10-20 13:13:29,231 - proposed_attack_model - INFO - accuracy: True
+2024-10-20 13:13:29,231 - proposed_attack_model - INFO - Target node: 1347
+2024-10-20 13:13:29,497 - fsspec.local - DEBUG - open file: C:/Users/Azharul Islam/Desktop/New folder (2)/graph-attack/data/processed/pre_transform.pt
+2024-10-20 13:13:29,499 - fsspec.local - DEBUG - open file: C:/Users/Azharul Islam/Desktop/New folder (2)/graph-attack/data/processed/pre_filter.pt
+2024-10-20 13:13:31,314 - proposed_attack_model - INFO - added: 1, removed: 0
+2024-10-20 13:13:31,324 - fsspec.local - DEBUG - open file: C:/Users/Azharul Islam/Desktop/New folder (2)/graph-attack/data/processed/pre_transform.pt
+2024-10-20 13:13:31,324 - fsspec.local - DEBUG - open file: C:/Users/Azharul Islam/Desktop/New folder (2)/graph-attack/data/processed/pre_filter.pt
+2024-10-20 13:14:47,098 - proposed_attack_model - INFO - accuracy: True
+2024-10-20 13:14:47,098 - proposed_attack_model - INFO - Target node: 1820
+2024-10-20 13:14:47,382 - fsspec.local - DEBUG - open file: C:/Users/Azharul Islam/Desktop/New folder (2)/graph-attack/data/processed/pre_transform.pt
+2024-10-20 13:14:47,383 - fsspec.local - DEBUG - open file: C:/Users/Azharul Islam/Desktop/New folder (2)/graph-attack/data/processed/pre_filter.pt
+2024-10-20 13:14:48,858 - proposed_attack_model - INFO - added: 1, removed: 0
+2024-10-20 13:14:48,874 - fsspec.local - DEBUG - open file: C:/Users/Azharul Islam/Desktop/New folder (2)/graph-attack/data/processed/pre_transform.pt
+2024-10-20 13:14:48,874 - fsspec.local - DEBUG - open file: C:/Users/Azharul Islam/Desktop/New folder (2)/graph-attack/data/processed/pre_filter.pt
+2024-10-20 13:16:04,910 - proposed_attack_model - INFO - accuracy: True
+2024-10-20 13:16:04,911 - proposed_attack_model - INFO - Target node: 2082
+2024-10-20 13:16:05,173 - fsspec.local - DEBUG - open file: C:/Users/Azharul Islam/Desktop/New folder (2)/graph-attack/data/processed/pre_transform.pt
+2024-10-20 13:16:05,173 - fsspec.local - DEBUG - open file: C:/Users/Azharul Islam/Desktop/New folder (2)/graph-attack/data/processed/pre_filter.pt
+2024-10-20 13:16:06,703 - proposed_attack_model - INFO - added: 1, removed: 0
+2024-10-20 13:16:06,716 - fsspec.local - DEBUG - open file: C:/Users/Azharul Islam/Desktop/New folder (2)/graph-attack/data/processed/pre_transform.pt
+2024-10-20 13:16:06,718 - fsspec.local - DEBUG - open file: C:/Users/Azharul Islam/Desktop/New folder (2)/graph-attack/data/processed/pre_filter.pt
+2024-10-20 13:17:21,721 - proposed_attack_model - INFO - accuracy: True
+2024-10-20 13:17:21,721 - proposed_attack_model - INFO - Target node: 1185
+2024-10-20 13:17:21,995 - fsspec.local - DEBUG - open file: C:/Users/Azharul Islam/Desktop/New folder (2)/graph-attack/data/processed/pre_transform.pt
+2024-10-20 13:17:21,995 - fsspec.local - DEBUG - open file: C:/Users/Azharul Islam/Desktop/New folder (2)/graph-attack/data/processed/pre_filter.pt
+2024-10-20 13:17:23,619 - proposed_attack_model - INFO - added: 1, removed: 0
+2024-10-20 13:17:23,630 - fsspec.local - DEBUG - open file: C:/Users/Azharul Islam/Desktop/New folder (2)/graph-attack/data/processed/pre_transform.pt
+2024-10-20 13:17:23,631 - fsspec.local - DEBUG - open file: C:/Users/Azharul Islam/Desktop/New folder (2)/graph-attack/data/processed/pre_filter.pt
+2024-10-20 13:18:38,171 - proposed_attack_model - INFO - accuracy: True
+2024-10-20 13:18:38,172 - proposed_attack_model - INFO - Target node: 2469
+2024-10-20 13:18:38,435 - fsspec.local - DEBUG - open file: C:/Users/Azharul Islam/Desktop/New folder (2)/graph-attack/data/processed/pre_transform.pt
+2024-10-20 13:18:38,451 - fsspec.local - DEBUG - open file: C:/Users/Azharul Islam/Desktop/New folder (2)/graph-attack/data/processed/pre_filter.pt
+2024-10-20 13:18:39,932 - proposed_attack_model - INFO - added: 0, removed: 1
+2024-10-20 13:18:39,947 - fsspec.local - DEBUG - open file: C:/Users/Azharul Islam/Desktop/New folder (2)/graph-attack/data/processed/pre_transform.pt
+2024-10-20 13:18:39,947 - fsspec.local - DEBUG - open file: C:/Users/Azharul Islam/Desktop/New folder (2)/graph-attack/data/processed/pre_filter.pt
+2024-10-20 13:19:54,799 - proposed_attack_model - INFO - accuracy: True
+2024-10-20 13:19:54,800 - proposed_attack_model - INFO - Target node: 2459
+2024-10-20 13:19:55,065 - fsspec.local - DEBUG - open file: C:/Users/Azharul Islam/Desktop/New folder (2)/graph-attack/data/processed/pre_transform.pt
+2024-10-20 13:19:55,065 - fsspec.local - DEBUG - open file: C:/Users/Azharul Islam/Desktop/New folder (2)/graph-attack/data/processed/pre_filter.pt
+2024-10-20 13:19:56,566 - proposed_attack_model - INFO - added: 1, removed: 0
+2024-10-20 13:19:56,582 - fsspec.local - DEBUG - open file: C:/Users/Azharul Islam/Desktop/New folder (2)/graph-attack/data/processed/pre_transform.pt
+2024-10-20 13:19:56,582 - fsspec.local - DEBUG - open file: C:/Users/Azharul Islam/Desktop/New folder (2)/graph-attack/data/processed/pre_filter.pt
+2024-10-20 13:21:11,138 - proposed_attack_model - INFO - accuracy: False
+2024-10-20 13:21:11,139 - proposed_attack_model - INFO - Target node: 1370
+2024-10-20 13:21:11,528 - fsspec.local - DEBUG - open file: C:/Users/Azharul Islam/Desktop/New folder (2)/graph-attack/data/processed/pre_transform.pt
+2024-10-20 13:21:11,529 - fsspec.local - DEBUG - open file: C:/Users/Azharul Islam/Desktop/New folder (2)/graph-attack/data/processed/pre_filter.pt
+2024-10-20 13:21:12,526 - proposed_attack_model - INFO - added: 0, removed: 1
+2024-10-20 13:21:12,559 - fsspec.local - DEBUG - open file: C:/Users/Azharul Islam/Desktop/New folder (2)/graph-attack/data/processed/pre_transform.pt
+2024-10-20 13:21:12,559 - fsspec.local - DEBUG - open file: C:/Users/Azharul Islam/Desktop/New folder (2)/graph-attack/data/processed/pre_filter.pt
+2024-10-20 13:22:25,424 - proposed_attack_model - INFO - accuracy: False
+2024-10-20 13:22:25,424 - proposed_attack_model - INFO - Target node: 2391
+2024-10-20 13:22:25,676 - fsspec.local - DEBUG - open file: C:/Users/Azharul Islam/Desktop/New folder (2)/graph-attack/data/processed/pre_transform.pt
+2024-10-20 13:22:25,676 - fsspec.local - DEBUG - open file: C:/Users/Azharul Islam/Desktop/New folder (2)/graph-attack/data/processed/pre_filter.pt
+2024-10-20 13:22:27,480 - proposed_attack_model - INFO - added: 0, removed: 1
+2024-10-20 13:22:27,506 - fsspec.local - DEBUG - open file: C:/Users/Azharul Islam/Desktop/New folder (2)/graph-attack/data/processed/pre_transform.pt
+2024-10-20 13:22:27,507 - fsspec.local - DEBUG - open file: C:/Users/Azharul Islam/Desktop/New folder (2)/graph-attack/data/processed/pre_filter.pt

@@ -1,0 +1,20 @@
+2024-10-20 16:52:16,144 - proposed_attack_model - INFO - The attack has been started...
+2024-10-20 16:52:16,159 - __main__ - INFO - All attacks has been started...
+2024-10-20 16:52:16,362 - __main__ - INFO - Running attacks for 1 time(s)......
+2024-10-20 16:52:18,412 - __main__ - INFO - Node list: [1554, 929, 1504, 1342, 1163, 1255, 2406, 1820, 1340, 1347, 1959, 1337, 51, 429, 1279, 678, 1998, 421, 692, 1158, 817, 482, 1180, 1035, 629, 1975, 818, 632, 2127, 39, 1788, 2180, 1863, 506, 420, 500, 1494, 2055, 116, 411]
+2024-10-20 16:52:18,412 - __main__ - INFO - Targegt nodes are being selected...
+2024-10-20 16:52:18,413 - __main__ - INFO - Proposed model attack has started...
+2024-10-20 16:52:18,752 - proposed_attack_model - INFO - For budget number: 1
+2024-10-20 16:52:18,753 - proposed_attack_model - INFO - Target node: 1554
+2024-10-20 16:52:18,958 - fsspec.local - DEBUG - open file: C:/Users/Azharul Islam/Desktop/New folder (2)/graph-attack/data/processed/pre_transform.pt
+2024-10-20 16:52:18,959 - fsspec.local - DEBUG - open file: C:/Users/Azharul Islam/Desktop/New folder (2)/graph-attack/data/processed/pre_filter.pt
+2024-10-20 16:52:24,413 - proposed_attack_model - INFO - added: 1, removed: 0
+2024-10-20 16:52:24,424 - fsspec.local - DEBUG - open file: C:/Users/Azharul Islam/Desktop/New folder (2)/graph-attack/data/processed/pre_transform.pt
+2024-10-20 16:52:24,425 - fsspec.local - DEBUG - open file: C:/Users/Azharul Islam/Desktop/New folder (2)/graph-attack/data/processed/pre_filter.pt
+2024-10-20 16:53:10,789 - proposed_attack_model - INFO - accuracy: True
+2024-10-20 16:53:10,789 - proposed_attack_model - INFO - Target node: 929
+2024-10-20 16:53:11,101 - fsspec.local - DEBUG - open file: C:/Users/Azharul Islam/Desktop/New folder (2)/graph-attack/data/processed/pre_transform.pt
+2024-10-20 16:53:11,103 - fsspec.local - DEBUG - open file: C:/Users/Azharul Islam/Desktop/New folder (2)/graph-attack/data/processed/pre_filter.pt
+2024-10-20 16:53:12,934 - proposed_attack_model - INFO - added: 1, removed: 0
+2024-10-20 16:53:12,944 - fsspec.local - DEBUG - open file: C:/Users/Azharul Islam/Desktop/New folder (2)/graph-attack/data/processed/pre_transform.pt
+2024-10-20 16:53:12,945 - fsspec.local - DEBUG - open file: C:/Users/Azharul Islam/Desktop/New folder (2)/graph-attack/data/processed/pre_filter.pt
