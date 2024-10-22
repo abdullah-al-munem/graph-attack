@@ -1,2 +1,4 @@
 __pycache__/
 data/
+attack.log*
+all_attack.log*

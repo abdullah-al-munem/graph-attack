@@ -3,6 +3,7 @@ import logging
 import warnings
 import pandas as pd
 import ast
+import argparse
 
 from utils import get_dataset_from_deeprobust, get_target_node_list, get_miss_classification_original_dataset
 from proposed_attack_model import start_attack_proposed_model
@@ -58,12 +59,35 @@ if __name__ == "__main__":
     15. ogbn-graphsage
     '''
 
+    parser = argparse.ArgumentParser(description="Perform various attacks on GNN models")
+
     defense_model_list = ['gcn', 'gin', 'gat', 'graphsage', 'rgcn', 'mdgcn', 'jacgcn', 'svdgcn']
     dataset_list = ['cora', 'citeseer', 'polblogs', 'ogbn-arxiv', 'pubmed', 'BlogCatalog']
 
-    surrogate_model = 'gcn'
-    dataset = 'cora'
-    defense_model = 'mdgcn'
+    # Set surrogate_model as optional with a default value
+    parser.add_argument('--surrogate_model', type=str, default='gcn',
+                        help='The surrogate model to use (default: gcn)')
+
+    # Set dataset and defense_model as required arguments (no default values)
+    parser.add_argument('--dataset', type=str, required=True,
+                        help='The dataset to use (required)')
+    parser.add_argument('--defense_model', type=str, required=True,
+                        help='The defense model to use (required)')
+    
+    # Parse the arguments
+    args = parser.parse_args()
+
+    # Assign arguments to variables
+    surrogate_model = args.surrogate_model
+    dataset = args.dataset
+    defense_model = args.defense_model
+
+    logger.info(f"Surrogate model: {surrogate_model}, Dataset: {dataset}, Defense model: {defense_model}")
+
+
+    # surrogate_model = 'gcn'
+    # dataset = 'cora'
+    # defense_model = 'mdgcn'
 
     data = get_dataset_from_deeprobust(dataset=dataset)
     print("Dataset loaded...")
