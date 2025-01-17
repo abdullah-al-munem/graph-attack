@@ -29,14 +29,18 @@ The attack have two module.
    ```bash
     py -3.8 -m venv attack_venv
    ```
-3. Check the appropriate CUDA version if you have nvidia GPU:
+   or,
+   ```bash
+    conda create -n attack_venv python=3.8
+   ```
+4. Check the appropriate CUDA version if you have nvidia GPU:
    ```bash
    nvidia-smi
    ```
    [![Images](./images/nvidia_smi.png)](./images/nvidia_smi.png)
-4. Select the appropriate PyTorch version from [PyTorch's official website](https://pytorch.org/get-started/locally/).
+5. Select the appropriate PyTorch version from [PyTorch's official website](https://pytorch.org/get-started/locally/).
    [![Images](./images/pytorch_get_started.png)](./images/pytorch_get_started.png)
-5. Install the PyTorch separately using the selected command:
+6. Install the PyTorch separately using the selected command:
    ```bash
    pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
    ```
