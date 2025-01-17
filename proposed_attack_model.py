@@ -344,8 +344,6 @@ predict_classes = {
     'svdgcn': test_acc_SVDGCN
 }
 
-test_acc_GCN, test_acc_GIN, test_acc_GSAGE, test_acc_RGCN, test_acc_MDGCN, test_acc_JacGCN, test_acc_SVDGCN
-
 class ProposedAttack:
     def __init__(self, surrogate_model, dataset, defense_model, important_edge_list=None, attack_structure=True, attack_features=False, device=device):
         # data = Dataset(root=r'./', name=dataset) # load clean graph
