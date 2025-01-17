@@ -27,26 +27,19 @@ The attack have two module.
 1. **Python Version**: This project requires Python **3.8.0**. If you don't have it installed, you can download it from [Python's official website](https://www.python.org/downloads/release/python-380/).
 2. Create a virtual environment using the following command:
    ```bash
-    py -3.8 -m venv attack_venv
+    py -3.10 -m venv attack_venv
    ```
    or,
    ```bash
-    conda create -n attack_venv python=3.8
+    conda create -n attack_venv python=3.10 -y
    ```
-4. Check the appropriate CUDA version if you have nvidia GPU:
-   ```bash
-   nvidia-smi
-   ```
-   [![Images](./images/nvidia_smi.png)](./images/nvidia_smi.png)
-5. Select the appropriate PyTorch version from [PyTorch's official website](https://pytorch.org/get-started/locally/).
-   [![Images](./images/pytorch_get_started.png)](./images/pytorch_get_started.png)
-6. Install the PyTorch separately using the selected command:
-   ```bash
-   pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
-   ```
-7. **Dependencies**: Install rest of the project dependencies by running the following command:
+3. **Dependencies**: Install dependencies after activating the virtual environment:
    ```bash
    pip install -r requirements.txt
+   ```
+4. **Additional Dependencies**: Install additional dependencies:
+   ```bash
+   python install_reqs.py
    ```
    
 ## Usage
