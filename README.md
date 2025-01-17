@@ -63,6 +63,10 @@ The attack have two module.
    ```bash
     python perform_all_attacks.py
    ```
+   or,
+   ```bash
+    python perform_all_attacks.py --dataset citeseer --defense_model mdgcn
+   ```
 
 ## Flowchart
 
