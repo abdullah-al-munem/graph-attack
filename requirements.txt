@@ -1,5 +1,4 @@
 ﻿torch
-torchaudio
 torchvision
 torch_geometric
 numpy==1.24.1
