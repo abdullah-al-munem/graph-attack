@@ -61,11 +61,11 @@ The attack have two module.
     python perform_all_attacks.py --dataset citeseer --defense_model mdgcn
    ```
 
-<comment> ## Flowchart
+<!-- ## Flowchart -->
 
-<comment> Check out the flowchart PDF in the [flowchart folder](./flowchart/).
+<!-- Check out the flowchart PDF in the [flowchart folder](./flowchart/). -->
 
-<comment> [![Flowchart](./flowchart/Graph_Attack_Module.png)](./flowchart/Graph_Attack_Module.pdf)
+<!-- [![Flowchart](./flowchart/Graph_Attack_Module.png)](./flowchart/Graph_Attack_Module.pdf) -->
 
 
 
