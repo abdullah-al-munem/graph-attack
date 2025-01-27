@@ -1,26 +1,13 @@
-# Graph Attack
+# GAEttack
 
-Graph Attack is a Python project that implements a proposed attack model on graph data. 
+GAEttack: Graph Auto-Encoder based Adversarial Attacks on Graph Neural Networks
 
-## Table of Contents
-
-- [Introduction](#introduction)
-- [Features](#features)
-- [Installation](#installation)
-- [Usage](#usage)
-- [Flowchart](#flowchart)
-
-
-## Introduction
-
-A targeted attack on Node classification on Graph Dataset.
+## Abstract
 
 ## Features
 
-The attack have two module.
-
-- Add edge module
-- Remove edge module
+- Add edge 
+- Remove edge 
 
 ## Installation
 
@@ -44,15 +31,23 @@ The attack have two module.
    
 ## Usage
 1. Activate the virtual environment.
-2. To perform the **proposed attack**, run the following command:
+2. Precompute Important Edge Set: Edit the code accordingly (specify the dataset name).
+   ```bash
+    python create_important_edge_set copy.py
+   ```
+3. To perform the **proposed attack**, run the following command:
+   ```bash
+    python perform_single_attack.py --surrogate_model gcn --dataset cora --defense_model gcn --budget 1 --target_node 1687
+   ```
+   or, edit the proposed_attack_model.py file accordingly and run it.
    ```bash
     python proposed_attack_model.py
    ```
-3. To perform a single **state of the art** attack, use **state_of_the_art_attack_models.py** script and edit accordingly.
+4. To perform a single **state of the art** attack, use **state_of_the_art_attack_models.py** script and edit accordingly.
     ```bash
     python state_of_the_art_attack_models.py
    ```
-4. To perform **all the attacks**, run the following command:
+5. To perform **all the attacks**, run the following command:
    ```bash
     python perform_all_attacks.py
    ```

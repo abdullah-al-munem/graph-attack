@@ -3,6 +3,7 @@ import warnings
 import torch
 import numpy as np
 import json
+import scipy.sparse as sp
 
 from deeprobust.graph.defense import GCN
 
@@ -38,6 +39,7 @@ def get_dataset_from_deeprobust(dataset):
     if dataset == 'ogbn-arxiv':
         pyg_data = PygNodePropPredDataset(name=dataset)
         data = Pyg2Dpr(pyg_data)
+        data.features = sp.csr_matrix(data.features)
     else:
         data = Dataset(root=r'./', name=dataset) 
     return data

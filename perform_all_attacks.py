@@ -62,7 +62,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Perform various attacks on GNN models")
 
     defense_model_list = ['gcn', 'gin', 'gat', 'graphsage', 'rgcn', 'mdgcn', 'jacgcn', 'svdgcn']
-    dataset_list = ['cora', 'citeseer', 'polblogs', 'ogbn-arxiv', 'pubmed', 'BlogCatalog']
+    dataset_list = ['cora', 'citeseer', 'polblogs', 'ogbn-arxiv', 'pubmed', 'blogcatalog']
 
     # Set surrogate_model as optional with a default value
     parser.add_argument('--surrogate_model', type=str, default='gcn',

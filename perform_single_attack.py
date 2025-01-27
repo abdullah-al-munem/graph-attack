@@ -1,3 +1,6 @@
+import os
+# os.environ["CUDA_VISIBLE_DEVICES"] = "1" 
+# os.environ["WORLD_SIZE"] = "1"
 import time
 import json
 
@@ -7,6 +10,7 @@ import matplotlib.pyplot as plt
 import os
 import tqdm
 import json
+import argparse
 import collections
 
 import networkx as nx
@@ -39,7 +43,7 @@ from utils import get_dataset_from_deeprobust, destructuring_dataset, get_predic
 
 warnings.simplefilter('ignore')
 
-
+add_remove_stat = collections.defaultdict(lambda : 0)
 log_file_name = "./attack.log"
 
 # Check if the file exists
@@ -343,6 +347,8 @@ predict_classes = {
     'jacgcn': test_acc_JacGCN,
     'svdgcn': test_acc_SVDGCN
 }
+
+test_acc_GCN, test_acc_GIN, test_acc_GSAGE, test_acc_RGCN, test_acc_MDGCN, test_acc_JacGCN, test_acc_SVDGCN
 
 class ProposedAttack:
     def __init__(self, surrogate_model, dataset, defense_model, important_edge_list=None, attack_structure=True, attack_features=False, device=device):
@@ -648,10 +654,11 @@ class ProposedAttack:
          
         adj2, features2, labels2 = self.data2.adj, self.data2.features, self.data2.labels
         modified_adj = adj2.copy().tolil()
-        if isinstance(features2, np.ndarray):
-            features2 = sp.csr_matrix(features2)
         # print(features2)
         # print(type(features2))
+        if isinstance(features2, np.ndarray):
+            features2 = sp.csr_matrix(features2)
+            
         modified_features = features2.copy().tolil()
         adj_norm = normalize_adj(modified_adj)
         nnodes = adj2.shape[0]
@@ -680,10 +687,13 @@ class ProposedAttack:
         potential_edges_add = self.get_nodes_to_connect_by_distance_top_n(updated_edges, target_node, n_add)
         potential_edges_add = [[target_node, node[0]] for node in potential_edges_add]
         # print(potential_edges_add)
+        # print()
 
         potential_edges_remove = [node for edge in final_prune_list for node in edge if node != target_node]
         potential_edges_remove = [[target_node, node] for node in potential_edges_remove]
         # print(potential_edges_remove)
+        # print()
+
         potential_edges_final = potential_edges_remove + potential_edges_add
         potential_edges_final = np.array(potential_edges_final).astype("int32")
 
@@ -696,6 +706,7 @@ class ProposedAttack:
         # print(singleton_filter)
         potential_edges_final = potential_edges_final[singleton_filter]
         # print(potential_edges_final)
+        # print()
         
         label_u = labels2[target_node]
         cnt_add = 0
@@ -715,9 +726,11 @@ class ProposedAttack:
             if adj2[best_edge[0], best_edge[1]]:
                 msg = "Removed"  
                 cnt_remove += 1
+                add_remove_stat['remove'] += 1
             else: 
                 msg = "Added"
                 cnt_add += 1
+                add_remove_stat['add'] += 1
 
             print(f"{msg} best_edge_score: {best_edge_score}, best_edge: {best_edge}")
             # potential_edges_final.remove(best_edge)
@@ -741,93 +754,6 @@ def get_important_edge_list_for_precompute(surrogate_model, dataset, defense_mod
     important_edge_list = proposed_model.get_important_edge_list()
     return important_edge_list
 
-def start_attack_proposed_model(surrogate_model, dataset, defense_model, budget_range, node_list, times=1):
-    acc_list = []
-    acc_node = {}
-
-    global add_remove_stat
-    add_remove_stat = collections.defaultdict(lambda : 0)
-    start_budget = 1 ## this will be the function parameter (code cleaning is not done yet.)
-
-    # Load the dictionary from the JSON file
-    with open('./important_edge_list.json', 'r') as json_file:
-        important_edge_list_dict = json.load(json_file)
-
-    # Convert lists back to tuples
-    important_edge_list = [tuple(item) for item in important_edge_list_dict[dataset]]
-
-    already_misclassified = set()
-
-    for budget in tqdm.tqdm(range(start_budget, budget_range+1)):
-        print(f"For budget number: {budget}")
-        logger.info(f"For budget number: {budget}")
-        
-        cnt = 0
-        curr_acc = {1:[], 0:[]}
-
-        start_time = time.time()
-        
-        for target_node in tqdm.tqdm(node_list):
-            print(f'Target node: {target_node}')
-            logger.info(f"Target node: {target_node}")
-            if target_node in already_misclassified:
-                cnt += 1
-                print("already misclassified...")
-                logger.info(f"already misclassified...")
-                continue
-
-            proposed_model = ProposedAttack(surrogate_model, dataset, defense_model, important_edge_list)
-            modified_adj = proposed_model.attack(target_node=target_node, n_perturbations=budget)
-            # print("haha!..")
-            accuracy = proposed_model.predict(modified_adj, target_node)
-            print("accuracy = ", accuracy)
-            logger.info(f"accuracy: {accuracy}")
-            if accuracy == 0:
-                curr_acc[0].append(target_node)
-                already_misclassified.add(target_node)
-                cnt += 1
-            else:
-                curr_acc[1].append(target_node)
-        
-        end_time = time.time()
-        running_time_seconds = end_time - start_time
-        running_time_minutes, running_time_seconds = convert_time(running_time_seconds)
-        print(f"running_time: {int(running_time_minutes)} minutes, {running_time_seconds} seconds")
-
-
-        acc_node[budget] = curr_acc
-        acc_list.append([budget, cnt / len(node_list), node_list])
-        
-        print(f"Total Target: {len(node_list)}")
-        print('Miss-classification rate Modified : %s' % (cnt / len(node_list)))
-        logger.info('Miss-classification rate Modified : %s' % (cnt / len(node_list)))
-    
-    df = pd.DataFrame(acc_list, columns =['budget_number', 'miss-classification_modified', 'node_list']) 
-    df.to_csv(f'proposed_model_{dataset}_{defense_model}_{times}.csv') ## please change the number accordingly 
-
-    with open(f"./add_remove_stat_proposed_model_{dataset}_{defense_model}_{times}.json", 'w', encoding='utf-8') as json_file:
-        json.dump(add_remove_stat, json_file, indent=4, ensure_ascii=False)
-
-
-    # Create two line charts for col1 and col2
-    plt.figure(figsize=(8, 6))
-
-    # Line chart for col1
-    plt.plot(df['budget_number'], df['miss-classification_modified'], label='Modified Adj', marker='o', markersize=5, linestyle='-')
-
-    # plt.ylim(bottom=0.10, top=0.50)
-
-    # Add labels and a legend
-    plt.xlabel('target_number') 
-    plt.ylabel('miss-classification')
-    plt.title(f'proposed_model_{dataset}_{defense_model}_{times}')
-    plt.legend()
-
-    # Show the plot
-    plt.grid(True)
-    plt.savefig(f'proposed_model_{dataset}_{defense_model}_{times}.png')
-    # plt.show()
-
 
 if __name__ == "__main__": 
 
@@ -836,43 +762,48 @@ if __name__ == "__main__":
     1. model can assume the class is false but after the modification, for new graph representation it can be true, although all the budgets are not used yet. It can be possible if we use all the budget then it may really return false. since the model is trained on original graph, it is very likely to happend. 
 
     '''
+    parser = argparse.ArgumentParser(description="Perfom Attack")
 
-    surrogate_model = 'gcn'
-    # dataset = 'cora'
-    defense_model = 'gcn'
+    # Set surrogate_model as optional with a default value
+    parser.add_argument('--surrogate_model', type=str, default='gcn',
+                        help='The surrogate model to use (default: gcn)')
 
-    # data = get_dataset_from_deeprobust(dataset=dataset)
-    # print("Dataset loaded...")
-    # budget_range = 7
+    # Set dataset and defense_model as required arguments (no default values)
+    parser.add_argument('--dataset', type=str, required=True,
+                        help='The dataset to use (required)')
+    parser.add_argument('--defense_model', type=str, required=True,
+                        help='The defense model to use (required)')
+    parser.add_argument('--budget', type=int, required=True,
+                        help='Budget (required)')
+    parser.add_argument('--target_node', type=int, required=True,
+                        help='Target Node (required)')
+    
+    # Parse the arguments
+    args = parser.parse_args()
 
-    # node_list = [929, 1342, 1554, 1255, 2406, 1163, 1340, 2077, 1347, 1820, 429, 1267, 1068, 1223, 1330, 1959, 2469, 1343, 1070, 2355, 1829, 482, 2035, 615, 1441, 23, 582, 875, 1309, 2256, 2396, 2228, 336, 463, 2142, 603, 2423, 2109, 846, 117]
-    # node_list = get_target_node_list(data)
-    # node_list = [1079,]
-    # print("Targegt nodes are being selected...")
+    # Assign arguments to variables
+    surrogate_model = args.surrogate_model
+    dataset = args.dataset
+    defense_model = args.defense_model
+    budget = args.budget
+    target_node = args.target_node
+    logger.info(f"Surrogate model: {surrogate_model}, Dataset: {dataset}, Defense model: {defense_model}, Budget: {budget}")
 
-    # start_attack_proposed_model(surrogate_model, dataset, defense_model, budget_range, node_list)
+    # Load the dictionary from the JSON file
+    with open('./important_edge_list.json', 'r') as json_file:
+        important_edge_list_dict = json.load(json_file)
 
-    # dataset_list = ['cora', 'citeseer', 'polblogs']
-    # important_edge_list_dict = {}
-    # for dataset in dataset_list:
-    #     important_edge_list = get_important_edge_list_for_precompute(surrogate_model, dataset, defense_model)
-    #     important_edge_list_dict[dataset] = important_edge_list
-    #     important_edge_list_dict[dataset] = [list(item) for item in important_edge_list_dict[dataset]]
+    # Convert lists back to tuples
+    important_edge_list = [tuple(item) for item in important_edge_list_dict[dataset]]
 
-    # # Save the dictionary to a JSON file
-    # with open('./important_edge_list.json', 'w') as json_file:
-    #     json.dump(important_edge_list_dict, json_file, indent=4)
+    proposed_model = ProposedAttack(surrogate_model, dataset, defense_model, important_edge_list)
+    modified_adj = proposed_model.attack(target_node=target_node, n_perturbations=budget)
+    # print("haha!..")
+    accuracy = proposed_model.predict(modified_adj, target_node)
+    print("accuracy = ", accuracy)
 
-    # dataset = 'ogbn-arxiv'
-    # important_edge_list_dict = json.load(open('./important_edge_list.json', 'r', encoding='utf-8'))
-    # important_edge_list = get_important_edge_list_for_precompute(surrogate_model, dataset, defense_model)
-    # important_edge_list_dict[dataset] = important_edge_list
-    # important_edge_list_dict[dataset] = [list(item) for item in important_edge_list_dict[dataset]]
-
-    # with open('./important_edge_list.json', 'w') as json_file:
-    #     json.dump(important_edge_list_dict, json_file, indent=4)
-
-
+    
+   
 
     
 
