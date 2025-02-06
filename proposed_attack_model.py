@@ -35,7 +35,8 @@ from autoencoders import GAEModel, VGAEModel
 
 from predict import test_GCN, test_GAT, test_GIN, test_GraphSAGE, test_RGCN, test_acc_GCN, test_acc_GIN, test_acc_GSAGE, test_acc_RGCN, test_acc_MDGCN, test_acc_JacGCN, test_acc_SVDGCN
 
-from utils import get_dataset_from_deeprobust, destructuring_dataset, get_predict_function, get_target_node_list
+from utils import get_dataset_from_deeprobust, load_distances_from_json, get_nodes_to_connect_by_distance_top_n_from_precompute, destructuring_dataset, get_predict_function, get_target_node_list
+
 
 warnings.simplefilter('ignore')
 
@@ -295,7 +296,7 @@ def struct_score(a_hat_uv, XW, label_u):
 
     return struct_scores
 
-def get_scores_and_egdes(filtered_edges, modified_features, target_node, W, label_u, modified_adj, adj_norm, nnodes):
+def get_scores_and_egdes(filtered_edges, modified_features, target_node, W, label_u, modified_adj, adj_norm, nnodes, budget):
 
     # potential_edges = potential_edges.astype("int32")
     # singleton_filter = filter_singletons(potential_edges, modified_adj)
@@ -303,13 +304,16 @@ def get_scores_and_egdes(filtered_edges, modified_features, target_node, W, labe
 
     # Compute new entries in A_hat_square_uv
     a_hat_uv_new = compute_new_a_hat_uv(filtered_edges, target_node, modified_adj, adj_norm, nnodes)
-    # Compute the struct scores for each potential edge
     struct_scores = struct_score(a_hat_uv_new, modified_features @ W, label_u)
-    best_edge_ix = struct_scores.argmin()
-    best_edge_score = struct_scores.min()
-    best_edge = filtered_edges[best_edge_ix]
-
-    return [best_edge_score, best_edge]
+    top_n_indices = np.argpartition(struct_scores, budget)[:budget]
+    top_n_scores = struct_scores[top_n_indices]
+    top_n_edges = [filtered_edges[i] for i in top_n_indices]
+    
+    sorted_indices = np.argsort(top_n_scores)
+    top_n_scores = top_n_scores[sorted_indices]
+    top_n_edges = [top_n_edges[i] for i in sorted_indices]
+    
+    return [top_n_scores, top_n_edges]
 
 def filter_singletons(edges, adj):
     """
@@ -363,6 +367,7 @@ class ProposedAttack:
         # print(len(self.surrogate_model_output))
         # print(len(self.labels), type(self.labels))
         self.important_edge_list = important_edge_list
+        self.precomputed_distances = load_distances_from_json(dataset)
         self.W = self.get_linearized_weight()
         # if important_edge_list != None:
         #     exit()
@@ -626,108 +631,102 @@ class ProposedAttack:
         sorted_list = sorted(final_prune_list_with_loss, key=lambda x: x[2], reverse=True)
         return sorted_list
     
+    def _get_edges_for_target(self, target_node: int, G: nx.Graph):
+        """Get edges connected to target node."""
+        return [[u, v] for u, v in self.important_edge_list 
+                if (u == target_node or v == target_node)]
+    
+    def _expand_edge_list(self, target_node: int, n_perturbations: int, 
+                         edge_list, G: nx.Graph):
+        """Expand edge list if needed to meet n_perturbations requirement."""
+        degree = dict(G.degree())
+        
+        if len(edge_list) < n_perturbations:
+            for u, v in G.edges():
+                if (u == target_node or v == target_node) and \
+                   [u, v] not in edge_list and [v, u] not in edge_list:
+                    if degree[u] > 1 and degree[v] > 1:
+                        edge_list.append([u, v])
+                        if len(edge_list) >= n_perturbations:
+                            break
+        return edge_list
+
+    def _get_potential_edges(self, target_node: int, n_perturbations: int, 
+                           current_edges, nnodes: int) -> np.ndarray:
+        """Get potential edges for modification."""
+        n_add = max(len(current_edges), n_perturbations)
+        
+        # Get edges to add based on distance
+        edges_to_add = get_nodes_to_connect_by_distance_top_n_from_precompute(self.precomputed_distances, target_node=target_node, N=n_add)
+        potential_edges_add = [[target_node, node[0]] for node in edges_to_add]
+        
+        # Get edges to remove
+        potential_edges_remove = [[target_node, node] for edge in current_edges 
+                                for node in edge if node != target_node]
+        
+        # Combine and convert to numpy array
+        potential_edges = np.array(potential_edges_remove + potential_edges_add, dtype=np.int32)
+        
+        # If we need more edges, add all possible edges with target node
+        if len(potential_edges) <= n_perturbations:
+            all_possible = np.column_stack((
+                np.tile(target_node, nnodes-1),
+                np.setdiff1d(np.arange(nnodes), target_node)
+            ))
+            potential_edges = np.concatenate((potential_edges, all_possible))
+            
+        return potential_edges
+    
     def attack(self, target_node, n_perturbations, isBoth=1, isAdd=0, isRemove=0):
         global add_remove_stat
-        assert self.important_edge_list is not None, "Create the important_edge_list first by calling get_important_edge_list function."
+        if self.important_edge_list is None:
+            raise ValueError("Call get_important_edge_list first to create important_edge_list.")
 
+        # Initialize graph and get initial edge list
         G = nx.Graph()
         G.add_edges_from(self.adj.tolist())
-        degree = dict(nx.degree(G))
+        edge_list = self._get_edges_for_target(target_node, G)
+        edge_list = self._expand_edge_list(target_node, n_perturbations, edge_list, G)
         
-        prune_list = []
-        for (u, v) in self.important_edge_list:
-            if (u == target_node or v == target_node):
-                if (u, v) not in prune_list:
-                    prune_list.append([u, v])
-                if (v, u) not in prune_list:
-                    prune_list.append([v, u])
+        # Setup for modification
+        modified_adj = self.data2.adj.copy().tolil()
+        modified_features = self.data2.features.copy().tolil()
+        nnodes = modified_adj.shape[0]
+        label_u = self.data2.labels[target_node]
         
-        final_prune_list = prune_list.copy()
-
-        updated_edges = self.adj.tolist()  
-         
-        adj2, features2, labels2 = self.data2.adj, self.data2.features, self.data2.labels
-        modified_adj = adj2.copy().tolil()
-        if isinstance(features2, np.ndarray):
-            features2 = sp.csr_matrix(features2)
-        # print(features2)
-        # print(type(features2))
-        modified_features = features2.copy().tolil()
-        adj_norm = normalize_adj(modified_adj)
-        nnodes = adj2.shape[0]
-
-        if len(final_prune_list) == 0:
-            final_prune_list = np.column_stack((np.tile(target_node, nnodes-1), np.setdiff1d(np.arange(nnodes), target_node)))
-
-        final_prune_list = np.array(final_prune_list).astype("int32")
+        # Get potential edges for modification
+        potential_edges = self._get_potential_edges(target_node, n_perturbations, edge_list, nnodes)
         
-        singleton_filter = filter_singletons(final_prune_list, modified_adj)
-        final_prune_list = final_prune_list[singleton_filter]
-
-        if len(final_prune_list) < n_perturbations:
-            for (u, v) in updated_edges.copy():
-                if (u == target_node or v == target_node) and ((u, v) not in final_prune_list) and ((v, u) not in final_prune_list):
-                    if degree[u] <= 1 or degree[v] <= 1:
-                        continue
-                    final_prune_list.append([u, v])
-                    if len(final_prune_list) > n_perturbations:
-                        break
+        # Filter singleton nodes
+        singleton_filter = filter_singletons(potential_edges, modified_adj)
+        potential_edges = potential_edges[singleton_filter]
         
-        # final_prune_list_tmp = np.array(final_prune_list.copy()).astype("int32")
-
-        n_add = max(len(final_prune_list), n_perturbations) 
-
-        potential_edges_add = self.get_nodes_to_connect_by_distance_top_n(updated_edges, target_node, n_add)
-        potential_edges_add = [[target_node, node[0]] for node in potential_edges_add]
-        # print(potential_edges_add)
-
-        potential_edges_remove = [node for edge in final_prune_list for node in edge if node != target_node]
-        potential_edges_remove = [[target_node, node] for node in potential_edges_remove]
-        # print(potential_edges_remove)
-        potential_edges_final = potential_edges_remove + potential_edges_add
-        potential_edges_final = np.array(potential_edges_final).astype("int32")
-
-        if len(potential_edges_final) <= n_perturbations:
-            potential_edges = np.column_stack((np.tile(target_node, nnodes-1), np.setdiff1d(np.arange(nnodes), target_node)))
-            potential_edges_final = np.concatenate((potential_edges_final, potential_edges))
-
-        # print(potential_edges_final)
-        singleton_filter = filter_singletons(potential_edges_final, modified_adj)
-        # print(singleton_filter)
-        potential_edges_final = potential_edges_final[singleton_filter]
-        # print(potential_edges_final)
+        print(f"Total potential edges: {len(potential_edges)}")
         
-        label_u = labels2[target_node]
-        cnt_add = 0
-        cnt_remove = 0
-
-        print(f"Total potential edges: {len(potential_edges_final)}")
-
-        # if len(potential_edges_final) < n_perturbations:
-
-        while n_perturbations:
-            best_edge_score, best_edge = get_scores_and_egdes(potential_edges_final, modified_features, target_node, self.W, label_u, modified_adj, adj_norm, nnodes)
-
-            modified_adj[tuple(best_edge)] = modified_adj[tuple(best_edge[::-1])] = 1 - modified_adj[tuple(best_edge)]
-            adj_norm = normalize_adj(modified_adj)
-            nnodes = modified_adj.shape[0]
-
-            if adj2[best_edge[0], best_edge[1]]:
-                msg = "Removed"  
+        # Get best edges and their scores
+        best_edge_scores, best_edges = get_scores_and_egdes(
+            potential_edges, modified_features, target_node, 
+            self.W, label_u, modified_adj, normalize_adj(modified_adj), 
+            nnodes, n_perturbations
+        )
+        
+        # Modify edges
+        cnt_add = cnt_remove = 0
+        for score, edge in zip(best_edge_scores, best_edges):
+            # Toggle edge in adjacency matrix
+            modified_adj[edge[0], edge[1]] = modified_adj[edge[1], edge[0]] = \
+                1 - modified_adj[edge[0], edge[1]]
+            
+            # Update counters and print progress
+            if self.data2.adj[edge[0], edge[1]]:
                 cnt_remove += 1
-            else: 
-                msg = "Added"
+                action = "Removed"
+            else:
                 cnt_add += 1
-
-            print(f"{msg} best_edge_score: {best_edge_score}, best_edge: {best_edge}")
-            # potential_edges_final.remove(best_edge)
-            potential_edges_final = potential_edges_final[~np.all(potential_edges_final == best_edge, axis=1)]
-            potential_edges_final = potential_edges_final[~np.all(potential_edges_final == best_edge[::-1], axis=1)]
-            n_perturbations -= 1
-
+                action = "Added"
+            print(f"{action} edge_score: {score}, edge: {edge}")
+        
         print(f"added: {cnt_add}, removed: {cnt_remove}")
-        logger.info(f"added: {cnt_add}, removed: {cnt_remove}")
-
         return modified_adj
     
     def predict(self, modified_adj, target_node):
@@ -810,22 +809,22 @@ def start_attack_proposed_model(surrogate_model, dataset, defense_model, budget_
 
 
     # Create two line charts for col1 and col2
-    plt.figure(figsize=(8, 6))
+    # plt.figure(figsize=(8, 6))
 
-    # Line chart for col1
-    plt.plot(df['budget_number'], df['miss-classification_modified'], label='Modified Adj', marker='o', markersize=5, linestyle='-')
+    # # Line chart for col1
+    # plt.plot(df['budget_number'], df['miss-classification_modified'], label='Modified Adj', marker='o', markersize=5, linestyle='-')
 
-    # plt.ylim(bottom=0.10, top=0.50)
+    # # plt.ylim(bottom=0.10, top=0.50)
 
-    # Add labels and a legend
-    plt.xlabel('target_number') 
-    plt.ylabel('miss-classification')
-    plt.title(f'proposed_model_{dataset}_{defense_model}_{times}')
-    plt.legend()
+    # # Add labels and a legend
+    # plt.xlabel('target_number') 
+    # plt.ylabel('miss-classification')
+    # plt.title(f'proposed_model_{dataset}_{defense_model}_{times}')
+    # plt.legend()
 
-    # Show the plot
-    plt.grid(True)
-    plt.savefig(f'proposed_model_{dataset}_{defense_model}_{times}.png')
+    # # Show the plot
+    # plt.grid(True)
+    # plt.savefig(f'proposed_model_{dataset}_{defense_model}_{times}.png')
     # plt.show()
 
 
@@ -838,19 +837,19 @@ if __name__ == "__main__":
     '''
 
     surrogate_model = 'gcn'
-    # dataset = 'cora'
+    dataset = 'cora'
     defense_model = 'gcn'
 
-    # data = get_dataset_from_deeprobust(dataset=dataset)
+    data = get_dataset_from_deeprobust(dataset=dataset)
     # print("Dataset loaded...")
-    # budget_range = 7
+    budget_range = 7
 
     # node_list = [929, 1342, 1554, 1255, 2406, 1163, 1340, 2077, 1347, 1820, 429, 1267, 1068, 1223, 1330, 1959, 2469, 1343, 1070, 2355, 1829, 482, 2035, 615, 1441, 23, 582, 875, 1309, 2256, 2396, 2228, 336, 463, 2142, 603, 2423, 2109, 846, 117]
-    # node_list = get_target_node_list(data)
+    node_list = get_target_node_list(data)
     # node_list = [1079,]
     # print("Targegt nodes are being selected...")
 
-    # start_attack_proposed_model(surrogate_model, dataset, defense_model, budget_range, node_list)
+    start_attack_proposed_model(surrogate_model, dataset, defense_model, budget_range, node_list)
 
     # dataset_list = ['cora', 'citeseer', 'polblogs']
     # important_edge_list_dict = {}

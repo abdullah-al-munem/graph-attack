@@ -6,8 +6,8 @@ GAEttack: Graph Auto-Encoder based Adversarial Attacks on Graph Neural Networks
 
 ## Features
 
-- Add edge 
-- Remove edge 
+- Add edge
+- Remove edge
 
 ## Installation
 
@@ -28,14 +28,19 @@ GAEttack: Graph Auto-Encoder based Adversarial Attacks on Graph Neural Networks
    ```bash
    python install_reqs.py
    ```
-   
+
 ## Usage
+
 1. Activate the virtual environment.
 2. Precompute Important Edge Set: Edit the code accordingly (specify the dataset name).
    ```bash
-    python create_important_edge_set copy.py
+    python create_important_edge_set.py
    ```
-3. To perform the **proposed attack**, run the following command:
+3. Precompute Distance JSON: Edit the code accordingly (specify the dataset name).
+   ```bash
+    python precompute_distance.py
+   ```
+4. To perform the **proposed attack**, run the following command:
    ```bash
     python perform_single_attack.py --surrogate_model gcn --dataset cora --defense_model gcn --budget 1 --target_node 1687
    ```
@@ -43,11 +48,11 @@ GAEttack: Graph Auto-Encoder based Adversarial Attacks on Graph Neural Networks
    ```bash
     python proposed_attack_model.py
    ```
-4. To perform a single **state of the art** attack, use **state_of_the_art_attack_models.py** script and edit accordingly.
-    ```bash
-    python state_of_the_art_attack_models.py
+5. To perform a single **state of the art** attack, use **state_of_the_art_attack_models.py** script and edit accordingly.
+   ```bash
+   python state_of_the_art_attack_models.py
    ```
-5. To perform **all the attacks**, run the following command:
+6. To perform **all the attacks**, run the following command:
    ```bash
     python perform_all_attacks.py
    ```
@@ -61,7 +66,3 @@ GAEttack: Graph Auto-Encoder based Adversarial Attacks on Graph Neural Networks
 <!-- Check out the flowchart PDF in the [flowchart folder](./flowchart/). -->
 
 <!-- [![Flowchart](./flowchart/Graph_Attack_Module.png)](./flowchart/Graph_Attack_Module.pdf) -->
-
-
-
-
