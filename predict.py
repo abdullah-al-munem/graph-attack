@@ -10,6 +10,7 @@ from deeprobust.graph.defense import MedianGCN
 
 from GIN import GIN
 from GSAGE import GraphSAGE
+from scipy.sparse import csr_matrix
 
 def get_device():
 
@@ -153,7 +154,6 @@ def test_RGCN(adj, target_node, pyg_data, is_torch_geometric=True):
     adj, features, labels = data2.adj, data2.features, data2.labels
     idx_train, idx_val, idx_test = data2.idx_train, data2.idx_val, data2.idx_test
     
-    from scipy.sparse import csr_matrix
     features = csr_matrix(features)
     # print(type(adj), type(features))
 
@@ -192,7 +192,7 @@ def test_acc_GIN(adj,features, data, target_node):
 
     ''' test on GIN '''
     # reset feature to 0------------------------Remove this line if you don't want to feed GIN with node features.
-    data.features = sp.csr_matrix(data.features.shape, dtype=int)
+    data.features = csr_matrix(data.features.shape, dtype=int)
     pyg_data = Dpr2Pyg(data)
 
 
