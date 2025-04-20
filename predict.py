@@ -1,4 +1,5 @@
 import torch
+import scipy.sparse as sp
 
 from deeprobust.graph.data import Dataset, Dpr2Pyg, Pyg2Dpr
 from deeprobust.graph.defense import GCN

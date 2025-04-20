@@ -1,4 +1,5 @@
 import os
+import gc
 import warnings
 import torch
 import numpy as np
@@ -12,6 +13,11 @@ from predict import test_GCN, test_GAT, test_GIN, test_GraphSAGE, test_RGCN, tes
 
 from ogb.nodeproppred import PygNodePropPredDataset
 from deeprobust.graph.data import Pyg2Dpr, Dpr2Pyg
+import torch.serialization
+from torch_geometric.utils import to_undirected
+
+from torch_geometric.data.data import DataEdgeAttr
+torch.serialization.add_safe_globals([DataEdgeAttr])
 
 warnings.simplefilter('ignore')
 
@@ -35,11 +41,32 @@ def get_device():
 
 device = get_device()
 
+def clear_memory():
+    # Manually delete variables and run garbage collection
+    gc.collect()
+    torch.cuda.empty_cache()  # If using GPU
+
 def get_dataset_from_deeprobust(dataset):
+    clear_memory()  # Free memory before loading new dataset
+    
     if dataset == 'ogbn-arxiv':
         pyg_data = PygNodePropPredDataset(name=dataset)
-        data = Pyg2Dpr(pyg_data)
+        pyg_graph = pyg_data
+
+        # Step 2: Make edge_index bidirectional (undirected)
+        edge_index = pyg_graph.edge_index
+        edge_index = to_undirected(edge_index)
+        pyg_graph.edge_index = edge_index
+
+        # Step 3: Convert to DeepRobust-compatible format
+        data = Pyg2Dpr(pyg_graph)
+
+        # Step 4: Ensure features and adjacency matrix are in the correct format
         data.features = sp.csr_matrix(data.features)
+        data.adj = sp.csr_matrix((np.ones(edge_index.shape[1]), 
+                                (edge_index[0].numpy(), edge_index[1].numpy())),
+                                shape=(data.features.shape[0], data.features.shape[0]))
+
     else:
         data = Dataset(root=r'./', name=dataset) 
     return data

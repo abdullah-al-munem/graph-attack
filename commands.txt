@@ -1,0 +1,4 @@
+python perform_all_attacks.py --dataset ogbn-arxiv --defense_model gcn
+python perform_all_attacks.py --dataset ogbn-arxiv --defense_model gin
+python perform_all_attacks.py --dataset ogbn-arxiv --defense_model graphsage
+

@@ -89,13 +89,38 @@ class GAEModel:
 
     def get_decoded_edge_index(self, data, decoded, threshold=0.90):
         reshaped_edge_index = torch.transpose(data.edge_index, 0, 1)
-        decoded_edge_index_list = []
-        for i in range(len(decoded)):
-            if decoded[i] > threshold:
-                decoded_edge_index_list.append(list(reshaped_edge_index[i]))
 
-        decoded_edge_index = torch.tensor(decoded_edge_index_list, dtype=torch.long).t()
+        # Step 1: Create a list of dicts with index, value, and edge
+        decoded_info = [
+            {
+                'index': i,
+                'value': (decoded[i]).item() if isinstance(decoded[i], torch.Tensor) else decoded[i],
+                'edge': list(reshaped_edge_index[i])
+            }
+            for i in range(len(decoded))
+        ]
+
+        # Step 2: Sort by value (decoded score) in descending order
+        decoded_info.sort(key=lambda x: x['value'], reverse=True)
+
+        # Step 3: Filter by threshold and collect edges
+        decoded_edge_index_list = []
+        filtered_info = []
+
+        for info in decoded_info:
+            if info['value'] > threshold:
+                decoded_edge_index_list.append(info['edge'])
+                filtered_info.append(info)
+
+        # Step 4: Convert to tensor format
+        if decoded_edge_index_list:  # avoid error if empty
+            decoded_edge_index = torch.tensor(decoded_edge_index_list, dtype=torch.long).t()
+        else:
+            decoded_edge_index = torch.empty((2, 0), dtype=torch.long)
+
         return decoded_edge_index
+
+
 
 class VGAEModel:
     def __init__(self, in_channels, out_channels, epochs=1000, device=device, lr=0.01, variational=True):
@@ -141,13 +166,45 @@ class VGAEModel:
         decoded = self.model.decoder(encoded, data.edge_index)
         return decoded
 
+    # def get_decoded_edge_index(self, data, decoded, threshold=0.90):
+    #     reshaped_edge_index = torch.transpose(data.edge_index, 0, 1)
+    #     decoded_edge_index_list = []
+    #     for i in range(len(decoded)):
+    #         if decoded[i] > threshold:
+    #             decoded_edge_index_list.append(list(reshaped_edge_index[i]))
+
+    #     decoded_edge_index = torch.tensor(decoded_edge_index_list, dtype=torch.long).t()
+    #     return decoded_edge_index
+
     def get_decoded_edge_index(self, data, decoded, threshold=0.90):
         reshaped_edge_index = torch.transpose(data.edge_index, 0, 1)
-        decoded_edge_index_list = []
-        for i in range(len(decoded)):
-            if decoded[i] > threshold:
-                decoded_edge_index_list.append(list(reshaped_edge_index[i]))
 
-        decoded_edge_index = torch.tensor(decoded_edge_index_list, dtype=torch.long).t()
+        # Step 1: Create a list of dicts with index, value, and edge
+        decoded_info = [
+            {
+                'index': i,
+                'value': (decoded[i]).item() if isinstance(decoded[i], torch.Tensor) else decoded[i],
+                'edge': list(reshaped_edge_index[i])
+            }
+            for i in range(len(decoded))
+        ]
+
+        # Step 2: Sort by value (decoded score) in descending order
+        decoded_info.sort(key=lambda x: x['value'], reverse=True)
+
+        # Step 3: Filter by threshold and collect edges
+        decoded_edge_index_list = []
+        filtered_info = []
+
+        for info in decoded_info:
+            if info['value'] > threshold:
+                decoded_edge_index_list.append(info['edge'])
+                filtered_info.append(info)
+
+        # Step 4: Convert to tensor format
+        if decoded_edge_index_list:  # avoid error if empty
+            decoded_edge_index = torch.tensor(decoded_edge_index_list, dtype=torch.long).t()
+        else:
+            decoded_edge_index = torch.empty((2, 0), dtype=torch.long)
+
         return decoded_edge_index
-    

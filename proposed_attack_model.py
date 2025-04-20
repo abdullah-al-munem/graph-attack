@@ -466,7 +466,7 @@ class ProposedAttack:
 
         return top_nodes_from_specific_node[:N]
 
-    def get_decoded_edge_index_from_GAE(self):
+    def get_decoded_edge_index_from_GAE(self, threshold):
         # Normalize node features
         normalizer = T.NormalizeFeatures()
         normalize_data = normalizer(self.data)
@@ -484,11 +484,11 @@ class ProposedAttack:
         model.train_and_test(train_data, test_data)
         encoded = model.get_encoding(train_data)
         decoded = model.get_decoding(train_data, encoded)
-        decoded_edge_index = model.get_decoded_edge_index(train_data, decoded)
+        decoded_edge_index = model.get_decoded_edge_index(train_data, decoded, threshold=threshold)
 
         return decoded_edge_index
 
-    def get_decoded_edge_index_from_VGAE(self):
+    def get_decoded_edge_index_from_VGAE(self, threshold):
         # Normalize node features
         normalizer = T.NormalizeFeatures()
         normalize_data = normalizer(self.data)
@@ -506,13 +506,13 @@ class ProposedAttack:
         model.train_and_test(train_data, test_data)
         encoded = model.get_encoding(train_data)
         decoded = model.get_decoding(train_data, encoded)
-        decoded_edge_index = model.get_decoded_edge_index(train_data, decoded)
+        decoded_edge_index = model.get_decoded_edge_index(train_data, decoded, threshold=threshold)
 
         return decoded_edge_index
 
-    def get_important_edge_list(self):
-        decoded_edge_index_GAE = self.get_decoded_edge_index_from_GAE()
-        decoded_edge_index_VGAE = self.get_decoded_edge_index_from_VGAE()
+    def get_important_edge_list(self, threshold):
+        decoded_edge_index_GAE = self.get_decoded_edge_index_from_GAE(threshold=threshold)
+        decoded_edge_index_VGAE = self.get_decoded_edge_index_from_VGAE(threshold=threshold)
 
         adj_list_GAE = decoded_edge_index_GAE.t().tolist()
         adj_list_VGAE = decoded_edge_index_VGAE.t().tolist()
@@ -660,6 +660,8 @@ class ProposedAttack:
             final_prune_list = np.column_stack((np.tile(target_node, nnodes-1), np.setdiff1d(np.arange(nnodes), target_node)))
 
         final_prune_list = np.array(final_prune_list).astype("int32")
+
+        final_prune_list = final_prune_list[:20]
         
         singleton_filter = filter_singletons(final_prune_list, modified_adj)
         final_prune_list = final_prune_list[singleton_filter]
@@ -736,9 +738,9 @@ class ProposedAttack:
 
         return predict_inner(modified_adj, self.data2.features, self.data2, target_node)
 
-def get_important_edge_list_for_precompute(surrogate_model, dataset, defense_model):
+def get_important_edge_list_for_precompute(surrogate_model, dataset, defense_model, threshold):
     proposed_model = ProposedAttack(surrogate_model, dataset, defense_model)
-    important_edge_list = proposed_model.get_important_edge_list()
+    important_edge_list = proposed_model.get_important_edge_list(threshold)
     return important_edge_list
 
 def start_attack_proposed_model(surrogate_model, dataset, defense_model, budget_range, node_list, times=1):

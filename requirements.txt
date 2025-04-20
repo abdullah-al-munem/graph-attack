@@ -1,5 +1,4 @@
 ﻿torch
-torchvision
 torch_geometric
 numpy==1.24.1
 pandas==2.0.3

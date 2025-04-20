@@ -3,11 +3,11 @@ import json
 from proposed_attack_model import ProposedAttack
 from utils import get_dataset_from_deeprobust
 
-def get_important_edge_list_for_precompute(surrogate_model, dataset, defense_model):
+def get_important_edge_list_for_precompute(surrogate_model, dataset, defense_model, threshold):
     data_time = {}
     proposed_model = ProposedAttack(surrogate_model, dataset, defense_model)
     # start_time = time.time()
-    important_edge_list = proposed_model.get_important_edge_list()
+    important_edge_list = proposed_model.get_important_edge_list(threshold)
     # end_time = time.time()
     # running_time_seconds = end_time - start_time
     # running_time_minutes = running_time_seconds // 60
@@ -27,7 +27,11 @@ if __name__ == "__main__":
     # dataset_list = ['cora']
     important_edge_list_dict = {}
     for dataset in dataset_list:
-        important_edge_list = get_important_edge_list_for_precompute(surrogate_model, dataset, defense_model)
+        if dataset == 'ogbn-arxiv':
+            threshold = 0.98
+        else:
+            threshold = 0.90
+        important_edge_list = get_important_edge_list_for_precompute(surrogate_model, dataset, defense_model, threshold)
         important_edge_list_dict[dataset] = important_edge_list
         important_edge_list_dict[dataset] = [list(item) for item in important_edge_list_dict[dataset]]
 
