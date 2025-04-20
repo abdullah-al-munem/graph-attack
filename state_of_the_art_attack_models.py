@@ -81,8 +81,11 @@ def start_attack_RND(dataset, defense_model, budget_range, node_list, times=1):
         print(f"Total Target nodes: {len(node_list)}")
         print('Miss-classification rate Modified : %s' % (cnt / len(node_list)))
     
+    root_dir = f"result__{dataset}_{defense_model}"
+    os.makedirs(root_dir, exist_ok=True)
+
     df = pd.DataFrame(acc_list, columns =['budget_number', 'miss-classification_modified', 'node_list']) 
-    df.to_csv(f'random_attack_{dataset}_{defense_model}_{times}.csv') ## please change the number accordingly 
+    df.to_csv(f'{root_dir}/random_attack_{dataset}_{defense_model}_{times}.csv') ## please change the number accordingly 
 
 
     # Create two line charts for col1 and col2
@@ -101,7 +104,7 @@ def start_attack_RND(dataset, defense_model, budget_range, node_list, times=1):
 
     # Show the plot
     plt.grid(True)
-    plt.savefig(f'random_attack_{dataset}_{defense_model}_{times}.png')
+    plt.savefig(f'{root_dir}/random_attack_{dataset}_{defense_model}_{times}.png')
     # plt.show()
 
 def start_attack_FGA(dataset, defense_model, budget_range, node_list, times=1):
@@ -140,8 +143,11 @@ def start_attack_FGA(dataset, defense_model, budget_range, node_list, times=1):
         print(f"Total Target: {len(node_list)}")
         print('Miss-classification rate Modified : %s' % (cnt / len(node_list)))
     
+    root_dir = f"result__{dataset}_{defense_model}"
+    os.makedirs(root_dir, exist_ok=True)
+
     df = pd.DataFrame(acc_list, columns =['budget_number', 'miss-classification_modified', 'node_list']) 
-    df.to_csv(f'FGA_{dataset}_{defense_model}_{times}.csv') ## please change the number accordingly 
+    df.to_csv(f'{root_dir}/FGA_{dataset}_{defense_model}_{times}.csv') ## please change the number accordingly 
 
 
     # Create two line charts for col1 and col2
@@ -160,7 +166,7 @@ def start_attack_FGA(dataset, defense_model, budget_range, node_list, times=1):
 
     # Show the plot
     plt.grid(True)
-    plt.savefig(f'FGA_{dataset}_{defense_model}_{times}.png')
+    plt.savefig(f'{root_dir}/FGA_{dataset}_{defense_model}_{times}.png')
     # plt.show()
 
 def start_attack_Nettack(dataset, defense_model, budget_range, node_list, times=1):
@@ -199,8 +205,11 @@ def start_attack_Nettack(dataset, defense_model, budget_range, node_list, times=
         print(f"Total Target: {len(node_list)}")
         print('Miss-classification rate Modified : %s' % (cnt / len(node_list)))
 
+    root_dir = f"result__{dataset}_{defense_model}"
+    os.makedirs(root_dir, exist_ok=True)
+
     df = pd.DataFrame(acc_list, columns =['budget_number', 'miss-classification_modified', 'node_list']) 
-    df.to_csv(f'Nettack_{dataset}_{defense_model}_{times}.csv') ## please change the number accordingly 
+    df.to_csv(f'{root_dir}/Nettack_{dataset}_{defense_model}_{times}.csv') ## please change the number accordingly 
 
     # Create two line charts for col1 and col2
     plt.figure(figsize=(8, 6))
@@ -218,7 +227,7 @@ def start_attack_Nettack(dataset, defense_model, budget_range, node_list, times=
 
     # Show the plot
     plt.grid(True)
-    plt.savefig(f'Nettack_{dataset}_{defense_model}_{times}.png')
+    plt.savefig(f'{root_dir}/Nettack_{dataset}_{defense_model}_{times}.png')
     # plt.show()
 
 def start_attack_SGAttack(dataset, defense_model, budget_range, node_list, times=1):
@@ -265,8 +274,11 @@ def start_attack_SGAttack(dataset, defense_model, budget_range, node_list, times
         print(f"Total Target: {len(node_list)}")
         print('Miss-classification rate Modified : %s' % (cnt / len(node_list)))
 
+    root_dir = f"result__{dataset}_{defense_model}"
+    os.makedirs(root_dir, exist_ok=True)
+
     df = pd.DataFrame(acc_list, columns =['budget_number', 'miss-classification_modified', 'node_list']) 
-    df.to_csv(f'SGAttack_{dataset}_{defense_model}_{times}.csv') ## please change the number accordingly 
+    df.to_csv(f'{root_dir}/SGAttack_{dataset}_{defense_model}_{times}.csv') ## please change the number accordingly 
 
     # Create two line charts for col1 and col2
     plt.figure(figsize=(8, 6))
@@ -284,7 +296,7 @@ def start_attack_SGAttack(dataset, defense_model, budget_range, node_list, times
 
     # Show the plot
     plt.grid(True)
-    plt.savefig(f'SGAttack_{dataset}_{defense_model}_{times}.png')
+    plt.savefig(f'{root_dir}/SGAttack_{dataset}_{defense_model}_{times}.png')
     # plt.show()
 
 
@@ -330,8 +342,11 @@ def start_attack_IGAttack(dataset, defense_model, budget_range, node_list, times
         print(f"Total Target: {len(node_list)}")
         print('Miss-classification rate Modified : %s' % (cnt / len(node_list)))
 
+    root_dir = f"result__{dataset}_{defense_model}"
+    os.makedirs(root_dir, exist_ok=True)
+
     df = pd.DataFrame(acc_list, columns =['budget_number', 'miss-classification_modified', 'node_list']) 
-    df.to_csv(f'IGAttack_{dataset}_{defense_model}_{times}.csv') ## please change the number accordingly 
+    df.to_csv(f'{root_dir}/IGAttack_{dataset}_{defense_model}_{times}.csv') ## please change the number accordingly 
 
     # Create two line charts for col1 and col2
     plt.figure(figsize=(8, 6))
@@ -349,7 +364,7 @@ def start_attack_IGAttack(dataset, defense_model, budget_range, node_list, times
 
     # Show the plot
     plt.grid(True)
-    plt.savefig(f'IGAttack_{dataset}_{defense_model}_{times}.png')
+    plt.savefig(f'{root_dir}/IGAttack_{dataset}_{defense_model}_{times}.png')
     # plt.show()
 
 

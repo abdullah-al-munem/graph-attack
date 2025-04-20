@@ -805,9 +805,12 @@ def start_attack_proposed_model(surrogate_model, dataset, defense_model, budget_
         logger.info('Miss-classification rate Modified : %s' % (cnt / len(node_list)))
     
     df = pd.DataFrame(acc_list, columns =['budget_number', 'miss-classification_modified', 'node_list']) 
-    df.to_csv(f'proposed_model_{dataset}_{defense_model}_{times}.csv') ## please change the number accordingly 
+    
+    root_dir = f"result__{dataset}_{defense_model}"
+    os.makedirs(root_dir, exist_ok=True)
+    df.to_csv(f'{root_dir}/proposed_model_{dataset}_{defense_model}_{times}.csv') ## please change the number accordingly 
 
-    with open(f"./add_remove_stat_proposed_model_{dataset}_{defense_model}_{times}.json", 'w', encoding='utf-8') as json_file:
+    with open(f"{root_dir}/add_remove_stat_proposed_model_{dataset}_{defense_model}_{times}.json", 'w', encoding='utf-8') as json_file:
         json.dump(add_remove_stat, json_file, indent=4, ensure_ascii=False)
 
 
@@ -827,7 +830,7 @@ def start_attack_proposed_model(surrogate_model, dataset, defense_model, budget_
 
     # Show the plot
     plt.grid(True)
-    plt.savefig(f'proposed_model_{dataset}_{defense_model}_{times}.png')
+    plt.savefig(f'{root_dir}/proposed_model_{dataset}_{defense_model}_{times}.png')
     # plt.show()
 
 
