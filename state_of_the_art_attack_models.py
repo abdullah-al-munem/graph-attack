@@ -1,3 +1,4 @@
+import os
 import collections
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -81,7 +82,7 @@ def start_attack_RND(dataset, defense_model, budget_range, node_list, times=1):
         print(f"Total Target nodes: {len(node_list)}")
         print('Miss-classification rate Modified : %s' % (cnt / len(node_list)))
     
-    root_dir = f"result__{dataset}_{defense_model}"
+    root_dir = f"result_{dataset}_{defense_model}"
     os.makedirs(root_dir, exist_ok=True)
 
     df = pd.DataFrame(acc_list, columns =['budget_number', 'miss-classification_modified', 'node_list']) 
@@ -143,7 +144,7 @@ def start_attack_FGA(dataset, defense_model, budget_range, node_list, times=1):
         print(f"Total Target: {len(node_list)}")
         print('Miss-classification rate Modified : %s' % (cnt / len(node_list)))
     
-    root_dir = f"result__{dataset}_{defense_model}"
+    root_dir = f"result_{dataset}_{defense_model}"
     os.makedirs(root_dir, exist_ok=True)
 
     df = pd.DataFrame(acc_list, columns =['budget_number', 'miss-classification_modified', 'node_list']) 
@@ -205,7 +206,7 @@ def start_attack_Nettack(dataset, defense_model, budget_range, node_list, times=
         print(f"Total Target: {len(node_list)}")
         print('Miss-classification rate Modified : %s' % (cnt / len(node_list)))
 
-    root_dir = f"result__{dataset}_{defense_model}"
+    root_dir = f"result_{dataset}_{defense_model}"
     os.makedirs(root_dir, exist_ok=True)
 
     df = pd.DataFrame(acc_list, columns =['budget_number', 'miss-classification_modified', 'node_list']) 
@@ -274,7 +275,7 @@ def start_attack_SGAttack(dataset, defense_model, budget_range, node_list, times
         print(f"Total Target: {len(node_list)}")
         print('Miss-classification rate Modified : %s' % (cnt / len(node_list)))
 
-    root_dir = f"result__{dataset}_{defense_model}"
+    root_dir = f"result_{dataset}_{defense_model}"
     os.makedirs(root_dir, exist_ok=True)
 
     df = pd.DataFrame(acc_list, columns =['budget_number', 'miss-classification_modified', 'node_list']) 
@@ -342,7 +343,7 @@ def start_attack_IGAttack(dataset, defense_model, budget_range, node_list, times
         print(f"Total Target: {len(node_list)}")
         print('Miss-classification rate Modified : %s' % (cnt / len(node_list)))
 
-    root_dir = f"result__{dataset}_{defense_model}"
+    root_dir = f"result_{dataset}_{defense_model}"
     os.makedirs(root_dir, exist_ok=True)
 
     df = pd.DataFrame(acc_list, columns =['budget_number', 'miss-classification_modified', 'node_list']) 

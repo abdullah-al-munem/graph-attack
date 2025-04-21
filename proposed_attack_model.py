@@ -806,7 +806,7 @@ def start_attack_proposed_model(surrogate_model, dataset, defense_model, budget_
     
     df = pd.DataFrame(acc_list, columns =['budget_number', 'miss-classification_modified', 'node_list']) 
     
-    root_dir = f"result__{dataset}_{defense_model}"
+    root_dir = f"result_{dataset}_{defense_model}"
     os.makedirs(root_dir, exist_ok=True)
     df.to_csv(f'{root_dir}/proposed_model_{dataset}_{defense_model}_{times}.csv') ## please change the number accordingly 
 
