@@ -1,4 +1,5 @@
 import os
+import glob
 # os.environ["CUDA_VISIBLE_DEVICES"] = "1" 
 import logging
 import warnings
@@ -96,7 +97,8 @@ if __name__ == "__main__":
 
     times = 5
 
-    file_list = os.listdir('./')
+    file_list = glob.glob(os.path.join(f"./result_{dataset}_{defense_model}", '*.csv'))
+
     # print(csv_file_list)
 
     for time in range(1, times+1):
