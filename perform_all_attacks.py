@@ -97,7 +97,9 @@ if __name__ == "__main__":
 
     times = 5
 
-    file_list = glob.glob(os.path.join(f"./result_{dataset}_{defense_model}", '*.csv'))
+    csv_file_list = glob.glob(os.path.join(f"./result_{dataset}_{defense_model}/", '*.csv'))
+    # print(file_list)
+    # exit()
 
     # print(csv_file_list)
 
@@ -105,9 +107,10 @@ if __name__ == "__main__":
         # print(f"Running attacks for {time} time(s)......")
         # print(f"Proposed model started...")
         flg_proposed, flg_random, flg_fga, flg_nettack, flg_sgattack = 1, 1, 1, 1, 1
-        csv_file_list = [file for file in file_list if ('.csv' in  file) and (str(time) in file)]
+        # csv_file_list = [file for file in file_list if ('.csv' in  file) and (str(time) in file)]
 
         for file in csv_file_list:
+            file = file.split('/')[-1]
             _model = file[:-4].split('_')[0]
             _time = int(file[:-4].split('_')[-1])
 
