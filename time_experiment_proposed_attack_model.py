@@ -744,9 +744,6 @@ def get_important_edge_list_for_precompute(surrogate_model, dataset, defense_mod
     return important_edge_list
 
 def start_attack_proposed_model(surrogate_model, dataset, defense_model, budget_range, node_list, times=1):
-    acc_list = []
-    acc_node = {}
-
     global add_remove_stat
     add_remove_stat = collections.defaultdict(lambda : 0)
     start_budget = 1 ## this will be the function parameter (code cleaning is not done yet.)
@@ -759,83 +756,22 @@ def start_attack_proposed_model(surrogate_model, dataset, defense_model, budget_
     important_edge_list = [tuple(item) for item in important_edge_list_dict[dataset]]
 
     already_misclassified = set()
+    start_time = time.time()
+    for target_node in tqdm.tqdm(node_list):
 
-    for budget in tqdm.tqdm(range(start_budget, budget_range+1)):
-        print(f"For budget number: {budget}")
-        logger.info(f"For budget number: {budget}")
-        
-        cnt = 0
-        curr_acc = {1:[], 0:[]}
+        proposed_model = ProposedAttack(surrogate_model, dataset, defense_model, important_edge_list)
+        modified_adj = proposed_model.attack(target_node=target_node, n_perturbations=budget_range)
+        # print("haha!..")
+    end_time = time.time()
+              
+    running_time_seconds = end_time - start_time
+    running_time_minutes, running_time_seconds = convert_time(running_time_seconds)
+    print(f"running_time: {int(running_time_minutes)} minutes, {running_time_seconds} seconds")
+    print(dataset, defense_model, budget_range, node_list)
+    print("================================================")
+    return running_time_minutes, running_time_seconds
 
-        start_time = time.time()
-        
-        for target_node in tqdm.tqdm(node_list):
-            print(f'Target node: {target_node}')
-            logger.info(f"Target node: {target_node}")
-            if target_node in already_misclassified:
-                cnt += 1
-                print("already misclassified...")
-                logger.info(f"already misclassified...")
-                continue
-
-            proposed_model = ProposedAttack(surrogate_model, dataset, defense_model, important_edge_list)
-            modified_adj = proposed_model.attack(target_node=target_node, n_perturbations=budget)
-            # print("haha!..")
-            end_time = time.time()
-            
-            accuracy = proposed_model.predict(modified_adj, target_node)
-            print("accuracy = ", accuracy)
-            logger.info(f"accuracy: {accuracy}")
-            if accuracy == 0:
-                curr_acc[0].append(target_node)
-                already_misclassified.add(target_node)
-                cnt += 1
-            else:
-                curr_acc[1].append(target_node)
-        
-        
-        running_time_seconds = end_time - start_time
-        running_time_minutes, running_time_seconds = convert_time(running_time_seconds)
-        print(f"running_time: {int(running_time_minutes)} minutes, {running_time_seconds} seconds")
-
-
-        acc_node[budget] = curr_acc
-        acc_list.append([budget, cnt / len(node_list), node_list])
-        
-        print(f"Total Target: {len(node_list)}")
-        print('Miss-classification rate Modified : %s' % (cnt / len(node_list)))
-        logger.info('Miss-classification rate Modified : %s' % (cnt / len(node_list)))
-    
-    df = pd.DataFrame(acc_list, columns =['budget_number', 'miss-classification_modified', 'node_list']) 
-    
-    root_dir = f"result_{dataset}_{defense_model}"
-    os.makedirs(root_dir, exist_ok=True)
-    df.to_csv(f'{root_dir}/proposed_model_{dataset}_{defense_model}_{times}.csv') ## please change the number accordingly 
-
-    with open(f"{root_dir}/add_remove_stat_proposed_model_{dataset}_{defense_model}_{times}.json", 'w', encoding='utf-8') as json_file:
-        json.dump(add_remove_stat, json_file, indent=4, ensure_ascii=False)
-
-
-    # Create two line charts for col1 and col2
-    plt.figure(figsize=(8, 6))
-
-    # Line chart for col1
-    plt.plot(df['budget_number'], df['miss-classification_modified'], label='Modified Adj', marker='o', markersize=5, linestyle='-')
-
-    # plt.ylim(bottom=0.10, top=0.50)
-
-    # Add labels and a legend
-    plt.xlabel('target_number') 
-    plt.ylabel('miss-classification')
-    plt.title(f'proposed_model_{dataset}_{defense_model}_{times}')
-    plt.legend()
-
-    # Show the plot
-    plt.grid(True)
-    plt.savefig(f'{root_dir}/proposed_model_{dataset}_{defense_model}_{times}.png')
-    # plt.show()
-
-
+      
 if __name__ == "__main__": 
 
     '''
