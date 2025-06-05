@@ -1,0 +1,462 @@
+{
+  "Proposed_model": {
+    "cora": [
+      {
+        "avg_running_time_of_5": 1.940933,
+        "budget": 1
+      },
+      {
+        "avg_running_time_of_5": 2.38592,
+        "budget": 2
+      },
+      {
+        "avg_running_time_of_5": 2.398935,
+        "budget": 3
+      },
+      {
+        "avg_running_time_of_5": 2.617223,
+        "budget": 4
+      },
+      {
+        "avg_running_time_of_5": 2.891119,
+        "budget": 5
+      },
+      {
+        "avg_running_time_of_5": 3.08308,
+        "budget": 6
+      },
+      {
+        "avg_running_time_of_5": 3.577884,
+        "budget": 7
+      }
+    ],
+    "citeseer": [
+      {
+        "avg_running_time_of_5": 1.296922,
+        "budget": 1
+      },
+      {
+        "avg_running_time_of_5": 1.326931,
+        "budget": 2
+      },
+      {
+        "avg_running_time_of_5": 1.436958,
+        "budget": 3
+      },
+      {
+        "avg_running_time_of_5": 1.508293,
+        "budget": 4
+      },
+      {
+        "avg_running_time_of_5": 1.624464,
+        "budget": 5
+      },
+      {
+        "avg_running_time_of_5": 1.664216,
+        "budget": 6
+      },
+      {
+        "avg_running_time_of_5": 1.710785,
+        "budget": 7
+      }
+    ],
+    "polblogs": [
+      {
+        "avg_running_time_of_5": 2.839568,
+        "budget": 1
+      },
+      {
+        "avg_running_time_of_5": 3.804051,
+        "budget": 2
+      },
+      {
+        "avg_running_time_of_5": 4.581657,
+        "budget": 3
+      },
+      {
+        "avg_running_time_of_5": 6.148228,
+        "budget": 4
+      },
+      {
+        "avg_running_time_of_5": 6.912638,
+        "budget": 5
+      },
+      {
+        "avg_running_time_of_5": 7.368258,
+        "budget": 6
+      },
+      {
+        "avg_running_time_of_5": 8.195823,
+        "budget": 7
+      }
+    ]
+  },
+  "Random_attack": {
+    "cora": [
+      {
+        "avg_running_time_of_5": 0.016091,
+        "budget": 1
+      },
+      {
+        "avg_running_time_of_5": 0.015283,
+        "budget": 2
+      },
+      {
+        "avg_running_time_of_5": 0.015379,
+        "budget": 3
+      },
+      {
+        "avg_running_time_of_5": 0.020857,
+        "budget": 4
+      },
+      {
+        "avg_running_time_of_5": 0.015497,
+        "budget": 5
+      },
+      {
+        "avg_running_time_of_5": 0.015719,
+        "budget": 6
+      },
+      {
+        "avg_running_time_of_5": 0.014554,
+        "budget": 7
+      }
+    ],
+    "citeseer": [
+      {
+        "avg_running_time_of_5": 0.012815,
+        "budget": 1
+      },
+      {
+        "avg_running_time_of_5": 0.012985,
+        "budget": 2
+      },
+      {
+        "avg_running_time_of_5": 0.013166,
+        "budget": 3
+      },
+      {
+        "avg_running_time_of_5": 0.013732,
+        "budget": 4
+      },
+      {
+        "avg_running_time_of_5": 0.013708,
+        "budget": 5
+      },
+      {
+        "avg_running_time_of_5": 0.01287,
+        "budget": 6
+      },
+      {
+        "avg_running_time_of_5": 0.012717,
+        "budget": 7
+      }
+    ],
+    "polblogs": [
+      {
+        "avg_running_time_of_5": 0.014172,
+        "budget": 1
+      },
+      {
+        "avg_running_time_of_5": 0.015648,
+        "budget": 2
+      },
+      {
+        "avg_running_time_of_5": 0.012327,
+        "budget": 3
+      },
+      {
+        "avg_running_time_of_5": 0.01286,
+        "budget": 4
+      },
+      {
+        "avg_running_time_of_5": 0.013306,
+        "budget": 5
+      },
+      {
+        "avg_running_time_of_5": 0.012998,
+        "budget": 6
+      },
+      {
+        "avg_running_time_of_5": 0.013481,
+        "budget": 7
+      }
+    ]
+  },
+  "FGA": {
+    "cora": [
+      {
+        "avg_running_time_of_5": 0.762968,
+        "budget": 1
+      },
+      {
+        "avg_running_time_of_5": 0.877986,
+        "budget": 2
+      },
+      {
+        "avg_running_time_of_5": 0.917673,
+        "budget": 3
+      },
+      {
+        "avg_running_time_of_5": 1.014472,
+        "budget": 4
+      },
+      {
+        "avg_running_time_of_5": 0.821793,
+        "budget": 5
+      },
+      {
+        "avg_running_time_of_5": 0.871468,
+        "budget": 6
+      },
+      {
+        "avg_running_time_of_5": 0.86426,
+        "budget": 7
+      }
+    ],
+    "citeseer": [
+      {
+        "avg_running_time_of_5": 0.537145,
+        "budget": 1
+      },
+      {
+        "avg_running_time_of_5": 0.590873,
+        "budget": 2
+      },
+      {
+        "avg_running_time_of_5": 0.557402,
+        "budget": 3
+      },
+      {
+        "avg_running_time_of_5": 0.478163,
+        "budget": 4
+      },
+      {
+        "avg_running_time_of_5": 0.586922,
+        "budget": 5
+      },
+      {
+        "avg_running_time_of_5": 0.641798,
+        "budget": 6
+      },
+      {
+        "avg_running_time_of_5": 0.560295,
+        "budget": 7
+      }
+    ],
+    "polblogs": [
+      {
+        "avg_running_time_of_5": 0.824334,
+        "budget": 1
+      },
+      {
+        "avg_running_time_of_5": 0.933987,
+        "budget": 2
+      },
+      {
+        "avg_running_time_of_5": 0.826376,
+        "budget": 3
+      },
+      {
+        "avg_running_time_of_5": 0.845597,
+        "budget": 4
+      },
+      {
+        "avg_running_time_of_5": 0.965272,
+        "budget": 5
+      },
+      {
+        "avg_running_time_of_5": 0.865836,
+        "budget": 6
+      },
+      {
+        "avg_running_time_of_5": 1.053586,
+        "budget": 7
+      }
+    ]
+  },
+  "Nettack": {
+    "cora": [
+      {
+        "avg_running_time_of_5": 3.251353,
+        "budget": 1
+      },
+      {
+        "avg_running_time_of_5": 2.368294,
+        "budget": 2
+      },
+      {
+        "avg_running_time_of_5": 3.174499,
+        "budget": 3
+      },
+      {
+        "avg_running_time_of_5": 4.019711,
+        "budget": 4
+      },
+      {
+        "avg_running_time_of_5": 4.90018,
+        "budget": 5
+      },
+      {
+        "avg_running_time_of_5": 5.656995,
+        "budget": 6
+      },
+      {
+        "avg_running_time_of_5": 6.537448,
+        "budget": 7
+      }
+    ],
+    "citeseer": [
+      {
+        "avg_running_time_of_5": 2.703024,
+        "budget": 1
+      },
+      {
+        "avg_running_time_of_5": 1.539713,
+        "budget": 2
+      },
+      {
+        "avg_running_time_of_5": 1.94121,
+        "budget": 3
+      },
+      {
+        "avg_running_time_of_5": 2.212235,
+        "budget": 4
+      },
+      {
+        "avg_running_time_of_5": 2.71053,
+        "budget": 5
+      },
+      {
+        "avg_running_time_of_5": 2.915559,
+        "budget": 6
+      },
+      {
+        "avg_running_time_of_5": 3.473482,
+        "budget": 7
+      }
+    ],
+    "polblogs": [
+      {
+        "avg_running_time_of_5": 4.042429,
+        "budget": 1
+      },
+      {
+        "avg_running_time_of_5": 4.118603,
+        "budget": 2
+      },
+      {
+        "avg_running_time_of_5": 5.716803,
+        "budget": 3
+      },
+      {
+        "avg_running_time_of_5": 7.310911,
+        "budget": 4
+      },
+      {
+        "avg_running_time_of_5": 9.090101,
+        "budget": 5
+      },
+      {
+        "avg_running_time_of_5": 10.129091,
+        "budget": 6
+      },
+      {
+        "avg_running_time_of_5": 11.788705,
+        "budget": 7
+      }
+    ]
+  },
+  "SGAttack_attack": {
+    "cora": [
+      {
+        "avg_running_time_of_5": 0.391392,
+        "budget": 1
+      },
+      {
+        "avg_running_time_of_5": 0.33745,
+        "budget": 2
+      },
+      {
+        "avg_running_time_of_5": 0.340126,
+        "budget": 3
+      },
+      {
+        "avg_running_time_of_5": 0.358484,
+        "budget": 4
+      },
+      {
+        "avg_running_time_of_5": 0.37842,
+        "budget": 5
+      },
+      {
+        "avg_running_time_of_5": 0.360995,
+        "budget": 6
+      },
+      {
+        "avg_running_time_of_5": 0.401537,
+        "budget": 7
+      }
+    ],
+    "citeseer": [
+      {
+        "avg_running_time_of_5": 0.250856,
+        "budget": 1
+      },
+      {
+        "avg_running_time_of_5": 0.208432,
+        "budget": 2
+      },
+      {
+        "avg_running_time_of_5": 0.211951,
+        "budget": 3
+      },
+      {
+        "avg_running_time_of_5": 0.260341,
+        "budget": 4
+      },
+      {
+        "avg_running_time_of_5": 0.299389,
+        "budget": 5
+      },
+      {
+        "avg_running_time_of_5": 0.242534,
+        "budget": 6
+      },
+      {
+        "avg_running_time_of_5": 0.232374,
+        "budget": 7
+      }
+    ],
+    "polblogs": [
+      {
+        "avg_running_time_of_5": 0.402588,
+        "budget": 1
+      },
+      {
+        "avg_running_time_of_5": 0.334561,
+        "budget": 2
+      },
+      {
+        "avg_running_time_of_5": 0.360298,
+        "budget": 3
+      },
+      {
+        "avg_running_time_of_5": 0.36119,
+        "budget": 4
+      },
+      {
+        "avg_running_time_of_5": 0.390261,
+        "budget": 5
+      },
+      {
+        "avg_running_time_of_5": 0.381635,
+        "budget": 6
+      },
+      {
+        "avg_running_time_of_5": 0.360756,
+        "budget": 7
+      }
+    ]
+  }
+}

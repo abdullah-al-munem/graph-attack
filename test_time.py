@@ -81,12 +81,12 @@ if __name__ == "__main__":
 
     defense_model_list = ['gcn', 'gin', 'graphsage', 'rgcn', 'mdgcn', 'jacgcn', 'svdgcn']
     dataset_list = ['cora', 'citeseer', 'polblogs']
-    # python test_time.py --dataset citeseer --defense_model gcn --gpu_id 0
-    # python test_time.py --dataset citeseer --defense_model gin --gpu_id 0
-    # python test_time.py --dataset citeseer --defense_model graphsage --gpu_id 0
-    # python test_time.py --dataset citeseer --defense_model rgcn --gpu_id 0
-    # python test_time.py --dataset citeseer --defense_model jacgcn --gpu_id 0
-    # python test_time.py --dataset citeseer --defense_model svdgcn --gpu_id 0
+    # python test_time.py --dataset polblogs --defense_model gcn --gpu_id 0
+    # python test_time.py --dataset polblogs --defense_model gin --gpu_id 0
+    # python test_time.py --dataset polblogs --defense_model graphsage --gpu_id 0
+    # python test_time.py --dataset polblogs --defense_model rgcn --gpu_id 0
+    # python test_time.py --dataset polblogs --defense_model jacgcn --gpu_id 0
+    # python test_time.py --dataset polblogs --defense_model svdgcn --gpu_id 0
 
     surrogate_model = 'gcn'
     # dataset = 'cora'

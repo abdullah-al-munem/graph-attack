@@ -23,6 +23,10 @@
         {
             "running_time": "0 minutes, 3.949298143386841 seconds",
             "budget": 6
+        },
+        {
+            "running_time": "0 minutes, 3.583845853805542 seconds",
+            "budget": 7
         }
     ],
     "Random_attack": [
@@ -49,6 +53,10 @@
         {
             "running_time": "0 minutes, 0.01266789436340332 seconds",
             "budget": 6
+        },
+        {
+            "running_time": "0 minutes, 0.012176513671875 seconds",
+            "budget": 7
         }
     ],
     "FGA": [
@@ -75,6 +83,10 @@
         {
             "running_time": "0 minutes, 0.7157533168792725 seconds",
             "budget": 6
+        },
+        {
+            "running_time": "0 minutes, 0.7242288589477539 seconds",
+            "budget": 7
         }
     ],
     "Nettack": [
@@ -101,6 +113,10 @@
         {
             "running_time": "0 minutes, 7.341434001922607 seconds",
             "budget": 6
+        },
+        {
+            "running_time": "0 minutes, 8.28923749923706 seconds",
+            "budget": 7
         }
     ],
     "SGAttack_attack": [
@@ -127,6 +143,10 @@
         {
             "running_time": "0 minutes, 0.3035705089569092 seconds",
             "budget": 6
+        },
+        {
+            "running_time": "0 minutes, 0.3332688808441162 seconds",
+            "budget": 7
         }
     ]
 }
