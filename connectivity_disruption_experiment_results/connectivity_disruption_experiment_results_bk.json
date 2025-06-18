@@ -1,0 +1,683 @@
+{
+    "experiment_metadata": {
+        "dataset": "cora",
+        "surrogate_model": "gcn",
+        "defense_model": "gcn",
+        "timestamp": 1749154599.1335385,
+        "experiment_type": "connectivity_disruption_theory_validation"
+    },
+    "summary_statistics": {
+        "dataset": "cora",
+        "surrogate_model": "gcn",
+        "total_nodes_tested": 40,
+        "total_properly_misclassified": 15,
+        "entropy_statistics": {
+            "mean_delta_entropy": -0.02898696263631185,
+            "std_delta_entropy": 0.7835679271527887,
+            "min_delta_entropy": -1.6876869201660156,
+            "max_delta_entropy": 1.353659987449646,
+            "median_delta_entropy": 0.04338604211807251
+        },
+        "kl_divergence_statistics": {
+            "mean_kl_divergence": 2.566090146700541,
+            "std_kl_divergence": 1.6849043100577998,
+            "min_kl_divergence": 0.6974365711212158,
+            "max_kl_divergence": 7.549876689910889,
+            "median_kl_divergence": 1.946671724319458
+        },
+        "entropy_change_analysis": {
+            "entropy_increases": {
+                "count": 8,
+                "percentage": 53.333333333333336,
+                "mean_delta_entropy": 0.5706241466104984,
+                "mean_kl_divergence": 1.6312512010335922
+            },
+            "entropy_decreases": {
+                "count": 7,
+                "percentage": 46.666666666666664,
+                "mean_delta_entropy": -0.7142568017755236,
+                "mean_kl_divergence": 3.634477513177054
+            },
+            "entropy_no_change": {
+                "count": 0,
+                "percentage": 0.0
+            }
+        },
+        "theorem_validation": {
+            "theorem_support_cases": 15,
+            "support_rate": 1.0,
+            "kl_divergence_positive_rate": 1.0,
+            "entropy_change_rate": 1.0
+        }
+    },
+    "properly_misclassified_results": [
+        {
+            "node_id": 886,
+            "actual_class": 2,
+            "predicted_class_before": 2,
+            "predicted_class_after": 3,
+            "probabilities_before": [
+                3.139254840789363e-05,
+                0.0008943062275648117,
+                0.9966841340065002,
+                0.002291558077558875,
+                8.224851626437157e-05,
+                5.993480954202823e-06,
+                1.0453035429236479e-05
+            ],
+            "probabilities_after": [
+                0.00012180732301203534,
+                0.00017240113811567426,
+                0.17026875913143158,
+                0.8284592628479004,
+                0.0005113260122016072,
+                0.00029360648477450013,
+                0.0001728050847304985
+            ],
+            "entropy_before": 0.02480827085673809,
+            "entropy_after": 0.4676976203918457,
+            "delta_entropy": 0.44288936257362366,
+            "kl_divergence": 1.748924970626831,
+            "attack_history": [
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0
+            ],
+            "properly_misclassified": true,
+            "originally_correct": true,
+            "after_attack_wrong": true,
+            "entropy_change_type": "increase",
+            "budget_used": 5,
+            "experiment_timestamp": 1749154525.6524448
+        },
+        {
+            "node_id": 2308,
+            "actual_class": 6,
+            "predicted_class_before": 6,
+            "predicted_class_after": 3,
+            "probabilities_before": [
+                0.20578810572624207,
+                0.008273947052657604,
+                0.20418767631053925,
+                0.07557854056358337,
+                0.008383573032915592,
+                0.011598702520132065,
+                0.48618945479393005
+            ],
+            "probabilities_after": [
+                0.007316413801163435,
+                0.0015697004273533821,
+                0.1189010962843895,
+                0.8104502558708191,
+                0.00016575117479078472,
+                0.005230388604104519,
+                0.056366417557001114
+            ],
+            "entropy_before": 1.3269853591918945,
+            "entropy_after": 0.6606614589691162,
+            "delta_entropy": -0.6663239002227783,
+            "kl_divergence": 1.721256971359253,
+            "attack_history": [
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                1.0
+            ],
+            "properly_misclassified": true,
+            "originally_correct": true,
+            "after_attack_wrong": true,
+            "entropy_change_type": "decrease",
+            "budget_used": 5,
+            "experiment_timestamp": 1749154530.1576855
+        },
+        {
+            "node_id": 319,
+            "actual_class": 0,
+            "predicted_class_before": 0,
+            "predicted_class_after": 2,
+            "probabilities_before": [
+                0.96773362159729,
+                0.00024230038980022073,
+                0.010547250509262085,
+                0.009486254304647446,
+                0.00043149717384949327,
+                0.0022967674303799868,
+                0.00926240999251604
+            ],
+            "probabilities_after": [
+                0.021188950166106224,
+                0.006918950472027063,
+                0.9584461450576782,
+                0.0010939594358205795,
+                0.0014577913098037243,
+                0.007119212299585342,
+                0.003775025950744748
+            ],
+            "entropy_before": 0.1866171658039093,
+            "entropy_after": 0.2300032079219818,
+            "delta_entropy": 0.04338604211807251,
+            "kl_divergence": 3.675477981567383,
+            "attack_history": [
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0
+            ],
+            "properly_misclassified": true,
+            "originally_correct": true,
+            "after_attack_wrong": true,
+            "entropy_change_type": "increase",
+            "budget_used": 5,
+            "experiment_timestamp": 1749154531.1530151
+        },
+        {
+            "node_id": 2152,
+            "actual_class": 6,
+            "predicted_class_before": 6,
+            "predicted_class_after": 2,
+            "probabilities_before": [
+                0.24296720325946808,
+                0.029596317559480667,
+                0.01764117181301117,
+                0.021209048107266426,
+                0.010503566823899746,
+                0.026509704068303108,
+                0.6515730023384094
+            ],
+            "probabilities_after": [
+                0.04714643955230713,
+                0.0021851672790944576,
+                0.9079494476318359,
+                0.007173276972025633,
+                0.0007216301746666431,
+                0.005588189233094454,
+                0.029235966503620148
+            ],
+            "entropy_before": 1.0240941047668457,
+            "entropy_after": 0.4179685711860657,
+            "delta_entropy": -0.60612553358078,
+            "kl_divergence": 2.520857095718384,
+            "attack_history": [
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0
+            ],
+            "properly_misclassified": true,
+            "originally_correct": true,
+            "after_attack_wrong": true,
+            "entropy_change_type": "decrease",
+            "budget_used": 5,
+            "experiment_timestamp": 1749154535.143447
+        },
+        {
+            "node_id": 40,
+            "actual_class": 6,
+            "predicted_class_before": 6,
+            "predicted_class_after": 3,
+            "probabilities_before": [
+                0.1267603635787964,
+                0.08506064862012863,
+                0.1308152973651886,
+                0.033870864659547806,
+                0.050049394369125366,
+                0.033650510013103485,
+                0.5397929549217224
+            ],
+            "probabilities_after": [
+                0.0020438991487026215,
+                0.004914439748972654,
+                0.04726003110408783,
+                0.9351859092712402,
+                0.0014057894004508853,
+                0.0013597714714705944,
+                0.007830125279724598
+            ],
+            "entropy_before": 1.449013113975525,
+            "entropy_after": 0.30187085270881653,
+            "delta_entropy": -1.1471422910690308,
+            "kl_divergence": 3.3583426475524902,
+            "attack_history": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0
+            ],
+            "properly_misclassified": true,
+            "originally_correct": true,
+            "after_attack_wrong": true,
+            "entropy_change_type": "decrease",
+            "budget_used": 5,
+            "experiment_timestamp": 1749154537.3310673
+        },
+        {
+            "node_id": 260,
+            "actual_class": 2,
+            "predicted_class_before": 2,
+            "predicted_class_after": 0,
+            "probabilities_before": [
+                0.006822153460234404,
+                0.023619133979082108,
+                0.920231819152832,
+                0.02861701510846615,
+                0.010028566233813763,
+                0.0010902093490585685,
+                0.009591134265065193
+            ],
+            "probabilities_after": [
+                0.9477611184120178,
+                0.004701347090303898,
+                0.03142174705862999,
+                0.006426941603422165,
+                0.005983268842101097,
+                0.0003224995743948966,
+                0.0033830045722424984
+            ],
+            "entropy_before": 0.3988531827926636,
+            "entropy_after": 0.2696801722049713,
+            "delta_entropy": -0.12917301058769226,
+            "kl_divergence": 3.1714463233947754,
+            "attack_history": [
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0
+            ],
+            "properly_misclassified": true,
+            "originally_correct": true,
+            "after_attack_wrong": true,
+            "entropy_change_type": "decrease",
+            "budget_used": 5,
+            "experiment_timestamp": 1749154542.78455
+        },
+        {
+            "node_id": 657,
+            "actual_class": 2,
+            "predicted_class_before": 2,
+            "predicted_class_after": 1,
+            "probabilities_before": [
+                0.022156331688165665,
+                0.08211414515972137,
+                0.809502899646759,
+                0.06981533020734787,
+                0.006587534677237272,
+                0.0015059952856972814,
+                0.008317764848470688
+            ],
+            "probabilities_after": [
+                0.05016108602285385,
+                0.5748239159584045,
+                0.08125963807106018,
+                0.005998294800519943,
+                0.003561984980478883,
+                0.015922201797366142,
+                0.26827293634414673
+            ],
+            "entropy_before": 0.7292910814285278,
+            "entropy_after": 1.1420214176177979,
+            "delta_entropy": 0.41273033618927,
+            "kl_divergence": 1.8259265422821045,
+            "attack_history": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0
+            ],
+            "properly_misclassified": true,
+            "originally_correct": true,
+            "after_attack_wrong": true,
+            "entropy_change_type": "increase",
+            "budget_used": 5,
+            "experiment_timestamp": 1749154543.9306188
+        },
+        {
+            "node_id": 72,
+            "actual_class": 2,
+            "predicted_class_before": 2,
+            "predicted_class_after": 1,
+            "probabilities_before": [
+                0.005499496124684811,
+                0.09052509069442749,
+                0.821133017539978,
+                0.06359436362981796,
+                0.010751161724328995,
+                0.003068184247240424,
+                0.005428716540336609
+            ],
+            "probabilities_after": [
+                0.0005783279775641859,
+                0.9881348609924316,
+                0.007132559083402157,
+                9.75240400293842e-05,
+                2.7867099561262876e-05,
+                0.00039370014565065503,
+                0.003635104512795806
+            ],
+            "entropy_before": 0.6779084801673889,
+            "entropy_after": 0.07606130093336105,
+            "delta_entropy": -0.6018471717834473,
+            "kl_divergence": 4.177731037139893,
+            "attack_history": [
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0
+            ],
+            "properly_misclassified": true,
+            "originally_correct": true,
+            "after_attack_wrong": true,
+            "entropy_change_type": "decrease",
+            "budget_used": 5,
+            "experiment_timestamp": 1749154571.4058068
+        },
+        {
+            "node_id": 236,
+            "actual_class": 0,
+            "predicted_class_before": 0,
+            "predicted_class_after": 1,
+            "probabilities_before": [
+                0.4138449430465698,
+                0.08205725252628326,
+                0.1442374885082245,
+                0.1311664879322052,
+                0.0467512346804142,
+                0.08001933246850967,
+                0.10192324221134186
+            ],
+            "probabilities_after": [
+                1.5032956980576273e-05,
+                0.999337375164032,
+                0.00014102649583946913,
+                8.533343498129398e-05,
+                3.0119654184090905e-05,
+                2.5303255824837834e-05,
+                0.0003658157947938889
+            ],
+            "entropy_before": 1.694042444229126,
+            "entropy_after": 0.00635547423735261,
+            "delta_entropy": -1.6876869201660156,
+            "kl_divergence": 7.549876689910889,
+            "attack_history": [
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0
+            ],
+            "properly_misclassified": true,
+            "originally_correct": true,
+            "after_attack_wrong": true,
+            "entropy_change_type": "decrease",
+            "budget_used": 5,
+            "experiment_timestamp": 1749154583.3344162
+        },
+        {
+            "node_id": 2468,
+            "actual_class": 6,
+            "predicted_class_before": 6,
+            "predicted_class_after": 0,
+            "probabilities_before": [
+                0.011484408751130104,
+                0.005483523011207581,
+                0.0004693451046478003,
+                0.010337745770812035,
+                0.0017585543682798743,
+                0.0006716076168231666,
+                0.9697948098182678
+            ],
+            "probabilities_after": [
+                0.5844272971153259,
+                0.0025784336030483246,
+                0.003928017802536488,
+                0.09460911154747009,
+                0.010816779918968678,
+                0.0023646578192710876,
+                0.30127570033073425
+            ],
+            "entropy_before": 0.1765122413635254,
+            "entropy_after": 0.9988389015197754,
+            "delta_entropy": 0.82232666015625,
+            "kl_divergence": 1.0648306608200073,
+            "attack_history": [
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0
+            ],
+            "properly_misclassified": true,
+            "originally_correct": true,
+            "after_attack_wrong": true,
+            "entropy_change_type": "increase",
+            "budget_used": 5,
+            "experiment_timestamp": 1749154584.5551038
+        },
+        {
+            "node_id": 764,
+            "actual_class": 5,
+            "predicted_class_before": 5,
+            "predicted_class_after": 6,
+            "probabilities_before": [
+                0.08365967124700546,
+                0.04167516157031059,
+                0.009588352404534817,
+                0.024952875450253487,
+                0.027295367792248726,
+                0.5636231899261475,
+                0.24920536577701569
+            ],
+            "probabilities_after": [
+                0.017932722344994545,
+                0.2020793855190277,
+                0.03228410333395004,
+                0.1082771047949791,
+                0.007933243177831173,
+                0.10160279273986816,
+                0.5298906564712524
+            ],
+            "entropy_before": 1.2443723678588867,
+            "entropy_after": 1.354027271270752,
+            "delta_entropy": 0.10965490341186523,
+            "kl_divergence": 0.8261806964874268,
+            "attack_history": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0
+            ],
+            "properly_misclassified": true,
+            "originally_correct": true,
+            "after_attack_wrong": true,
+            "entropy_change_type": "increase",
+            "budget_used": 5,
+            "experiment_timestamp": 1749154585.5542736
+        },
+        {
+            "node_id": 1691,
+            "actual_class": 2,
+            "predicted_class_before": 2,
+            "predicted_class_after": 3,
+            "probabilities_before": [
+                0.00040741762495599687,
+                0.0019406747305765748,
+                0.9931588768959045,
+                0.004164645913988352,
+                0.0001709096395643428,
+                2.6118166715605184e-05,
+                0.00013128887803759426
+            ],
+            "probabilities_after": [
+                5.515544762602076e-05,
+                0.0027421931736171246,
+                0.4821437895298004,
+                0.5109150409698486,
+                0.00011673512926790863,
+                0.0024255544412881136,
+                0.0016015355940908194
+            ],
+            "entropy_before": 0.04787537828087807,
+            "entropy_after": 0.7375248670578003,
+            "delta_entropy": 0.6896494626998901,
+            "kl_divergence": 0.6974365711212158,
+            "attack_history": [
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0
+            ],
+            "properly_misclassified": true,
+            "originally_correct": true,
+            "after_attack_wrong": true,
+            "entropy_change_type": "increase",
+            "budget_used": 5,
+            "experiment_timestamp": 1749154587.0622897
+        },
+        {
+            "node_id": 1534,
+            "actual_class": 1,
+            "predicted_class_before": 1,
+            "predicted_class_after": 3,
+            "probabilities_before": [
+                0.0004099949146620929,
+                0.967962384223938,
+                0.005940617993474007,
+                0.006487387232482433,
+                0.005128097254782915,
+                0.00051624805200845,
+                0.01355528924614191
+            ],
+            "probabilities_after": [
+                0.05773119628429413,
+                0.11921115219593048,
+                0.1940777748823166,
+                0.47118768095970154,
+                0.023868152871727943,
+                0.07670982927083969,
+                0.057214174419641495
+            ],
+            "entropy_before": 0.1870996057987213,
+            "entropy_after": 1.540759563446045,
+            "delta_entropy": 1.353659987449646,
+            "kl_divergence": 1.946671724319458,
+            "attack_history": [
+                0.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "properly_misclassified": true,
+            "originally_correct": true,
+            "after_attack_wrong": true,
+            "entropy_change_type": "increase",
+            "budget_used": 5,
+            "experiment_timestamp": 1749154588.0547848
+        },
+        {
+            "node_id": 1470,
+            "actual_class": 2,
+            "predicted_class_before": 2,
+            "predicted_class_after": 0,
+            "probabilities_before": [
+                0.06559190899133682,
+                0.05265570059418678,
+                0.8168496489524841,
+                0.01056588627398014,
+                0.020848305895924568,
+                0.014031138271093369,
+                0.019457422196865082
+            ],
+            "probabilities_after": [
+                0.8721365332603455,
+                0.026678575202822685,
+                0.018812531605362892,
+                0.033649567514657974,
+                0.015033897943794727,
+                0.0100627476349473,
+                0.023626089096069336
+            ],
+            "entropy_before": 0.7642440795898438,
+            "entropy_after": 0.6027452945709229,
+            "delta_entropy": -0.1614987850189209,
+            "kl_divergence": 2.9418318271636963,
+            "attack_history": [
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0
+            ],
+            "properly_misclassified": true,
+            "originally_correct": true,
+            "after_attack_wrong": true,
+            "entropy_change_type": "decrease",
+            "budget_used": 5,
+            "experiment_timestamp": 1749154590.342283
+        },
+        {
+            "node_id": 36,
+            "actual_class": 3,
+            "predicted_class_before": 3,
+            "predicted_class_after": 2,
+            "probabilities_before": [
+                2.45142600761028e-05,
+                8.09280390967615e-05,
+                0.0010298643028363585,
+                0.9987925291061401,
+                1.7318363461527042e-05,
+                2.083647245854081e-07,
+                5.460226384457201e-05
+            ],
+            "probabilities_after": [
+                0.001320752315223217,
+                0.01618647761642933,
+                0.7001451849937439,
+                0.27949291467666626,
+                0.0016887419624254107,
+                0.0003478192666079849,
+                0.0008180814911611378
+            ],
+            "entropy_before": 0.010042261332273483,
+            "entropy_after": 0.7007386684417725,
+            "delta_entropy": 0.6906964182853699,
+            "kl_divergence": 1.2645604610443115,
+            "attack_history": [
+                0.0,
+                0.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "properly_misclassified": true,
+            "originally_correct": true,
+            "after_attack_wrong": true,
+            "entropy_change_type": "increase",
+            "budget_used": 5,
+            "experiment_timestamp": 1749154594.8690238
+        }
+    ],
+    "all_tested_results_count": 40,
+    "theory_proof_data": {
+        "total_properly_misclassified": 15,
+        "entropy_increases": 8,
+        "entropy_decreases": 7,
+        "positive_kl_divergences": 15,
+        "theorem_support_evidence": {
+            "theorem_support_cases": 15,
+            "support_rate": 1.0,
+            "kl_divergence_positive_rate": 1.0,
+            "entropy_change_rate": 1.0
+        }
+    }
+}

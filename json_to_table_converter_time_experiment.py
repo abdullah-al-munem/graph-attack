@@ -2,11 +2,12 @@ import json
 import pandas as pd
 import numpy as np
 
-def create_comprehensive_table(json_file="averaged_running_times_gcn.json"):
+def create_comprehensive_table(json_file="averaged_running_times_gcn_with_std.json"):
     """
     Read the JSON file and create a comprehensive table showing all attack models,
     datasets, and budgets in a single, easy-to-compare format.
     Dataset-first organization for better visual comparison.
+    Now shows avg ± std format.
     """
     
     # Read the JSON file
@@ -41,15 +42,23 @@ def create_comprehensive_table(json_file="averaged_running_times_gcn.json"):
                 # Add budget columns (Budget_1 to Budget_7)
                 budget_data = data[attack_model][dataset]
                 
-                # Initialize all budgets to 0
+                # Initialize all budgets to default
                 for budget_num in range(1, 8):
-                    row[f'Budget_{budget_num}'] = 0.0
+                    row[f'Budget_{budget_num}'] = "0.0 ± 0.0"
                 
                 # Fill in actual data
                 for entry in budget_data:
                     budget_num = entry['budget']
-                    avg_time = entry['avg_running_time_of_5']
-                    row[f'Budget_{budget_num}'] = round(avg_time, 6)
+                    # Use avg_plus_minus_std if available, otherwise construct it
+                    if 'avg_plus_minus_std' in entry:
+                        avg_plus_minus_std = entry['avg_plus_minus_std']
+                    else:
+                        # Fallback: construct from individual values
+                        avg_time = entry.get('avg_running_time_of_5', 0.0)
+                        std_dev = entry.get('std_deviation', 0.0)
+                        avg_plus_minus_std = f"{round(avg_time, 6)} ± {round(std_dev, 6)}"
+                    
+                    row[f'Budget_{budget_num}'] = avg_plus_minus_std
                 
                 rows.append(row)
     
@@ -66,9 +75,10 @@ def create_comprehensive_table(json_file="averaged_running_times_gcn.json"):
     
     return df
 
-def create_pivot_table(json_file="averaged_running_times_gcn.json"):
+def create_pivot_table(json_file="averaged_running_times_gcn_with_std.json"):
     """
     Create a pivot table format that's more compact and easier to compare
+    Now shows avg ± std format.
     """
     
     # Read the JSON file
@@ -85,11 +95,20 @@ def create_pivot_table(json_file="averaged_running_times_gcn.json"):
     for attack_model in data:
         for dataset in data[attack_model]:
             for entry in data[attack_model][dataset]:
+                # Use avg_plus_minus_std if available, otherwise construct it
+                if 'avg_plus_minus_std' in entry:
+                    avg_plus_minus_std = entry['avg_plus_minus_std']
+                else:
+                    # Fallback: construct from individual values
+                    avg_time = entry.get('avg_running_time_of_5', 0.0)
+                    std_dev = entry.get('std_deviation', 0.0)
+                    avg_plus_minus_std = f"{round(avg_time, 6)} ± {round(std_dev, 6)}"
+                
                 long_data.append({
                     'Attack_Model': attack_model,
                     'Dataset': dataset,
                     'Budget': entry['budget'],
-                    'Avg_Running_Time': entry['avg_running_time_of_5']
+                    'Avg_Plus_Minus_Std': avg_plus_minus_std
                 })
     
     # Create DataFrame
@@ -99,16 +118,25 @@ def create_pivot_table(json_file="averaged_running_times_gcn.json"):
     pivot_df = df_long.pivot_table(
         index=['Attack_Model'],
         columns=['Dataset', 'Budget'],
-        values='Avg_Running_Time',
-        fill_value=0.0
+        values='Avg_Plus_Minus_Std',
+        fill_value="0.0 ± 0.0",
+        aggfunc='first'  # Since we're dealing with strings now
     )
-    
-    # Round to 6 decimal places
-    pivot_df = pivot_df.round(6)
     
     return pivot_df
 
-def save_to_excel_and_csv(df, pivot_df, base_filename="running_time_comparison"):
+def extract_average_for_comparison(avg_plus_minus_str):
+    """
+    Extract just the average value from 'avg ± std' string for numerical comparison
+    """
+    try:
+        # Split by ± and take the first part (average)
+        avg_part = avg_plus_minus_str.split('±')[0].strip()
+        return float(avg_part)
+    except:
+        return 0.0
+
+def save_to_excel_and_csv(df, pivot_df, base_filename="running_time_comparison_with_std"):
     """
     Save both formats to Excel and CSV files
     """
@@ -136,14 +164,14 @@ def save_to_excel_and_csv(df, pivot_df, base_filename="running_time_comparison")
     print(f"  - {pivot_csv_file}")
 
 def main():
-    print("Converting JSON to table format...")
+    print("Converting JSON to table format with standard deviation...")
     
     # Create comprehensive table
     df = create_comprehensive_table()
     
     if df is not None:
         print(f"\nComprehensive Table Preview:")
-        print("=" * 100)
+        print("=" * 120)
         print(df.head(10))
         print(f"\nTable shape: {df.shape[0]} rows × {df.shape[1]} columns")
         
@@ -157,10 +185,14 @@ def main():
         for dataset in df['Dataset'].unique():
             subset = df[df['Dataset'] == dataset]
             if not subset.empty:
-                fastest_idx = subset['Budget_1'].idxmin()
+                # Extract numerical values for comparison
+                subset_with_nums = subset.copy()
+                subset_with_nums['Budget_1_numeric'] = subset_with_nums['Budget_1'].apply(extract_average_for_comparison)
+                
+                fastest_idx = subset_with_nums['Budget_1_numeric'].idxmin()
                 fastest_model = subset.loc[fastest_idx, 'Attack_Model']
                 fastest_time = subset.loc[fastest_idx, 'Budget_1']
-                print(f"  {dataset}: {fastest_model} ({fastest_time:.6f} seconds)")
+                print(f"  {dataset}: {fastest_model} ({fastest_time} seconds)")
         
         # Show dataset grouping preview
         print(f"\nDataset Grouping Preview:")
@@ -173,24 +205,24 @@ def main():
         
         if pivot_df is not None:
             print(f"\n\nPivot Table Preview:")
-            print("=" * 100)
+            print("=" * 120)
             print(pivot_df)
             
             # Save both formats
             save_to_excel_and_csv(df, pivot_df)
             
             # Create a single recommended table (comprehensive format)
-            recommended_file = "recommended_running_time_comparison.xlsx"
+            recommended_file = "recommended_running_time_comparison_with_std.xlsx"
             
             # Add some formatting for better readability
             with pd.ExcelWriter(recommended_file, engine='openpyxl') as writer:
-                df.to_excel(writer, sheet_name='Running Time Comparison', index=False)
+                df.to_excel(writer, sheet_name='Running Time with Std Dev', index=False)
                 
                 # Get the workbook and worksheet
                 workbook = writer.book
-                worksheet = writer.sheets['Running Time Comparison']
+                worksheet = writer.sheets['Running Time with Std Dev']
                 
-                # Auto-adjust column widths
+                # Auto-adjust column widths (make them wider for the ± format)
                 for column in worksheet.columns:
                     max_length = 0
                     column_letter = column[0].column_letter
@@ -200,7 +232,8 @@ def main():
                                 max_length = len(str(cell.value))
                         except:
                             pass
-                    adjusted_width = min(max_length + 2, 20)
+                    # Make columns wider to accommodate "avg ± std" format
+                    adjusted_width = min(max_length + 3, 25)
                     worksheet.column_dimensions[column_letter].width = adjusted_width
                 
                 # Add visual separation between datasets using background colors
@@ -225,7 +258,7 @@ def main():
                         worksheet.cell(row=row_num, column=col_num).fill = fill
             
             print(f"\n*** RECOMMENDED FILE: {recommended_file} ***")
-            print("This file contains the most readable format for comparison!")
+            print("This file contains the most readable format with average ± standard deviation!")
     
     else:
         print("Failed to create table. Please check if the JSON file exists.")

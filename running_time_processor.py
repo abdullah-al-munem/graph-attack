@@ -1,6 +1,7 @@
 import json
 import os
 import re
+import statistics
 from collections import defaultdict
 
 def parse_time_string(time_str):
@@ -23,6 +24,23 @@ def parse_time_string(time_str):
             return float(seconds_match.group(1))
     
     return 0.0
+
+def calculate_stats(times):
+    """
+    Calculate mean and standard deviation for a list of times
+    """
+    if not times or len(times) == 0:
+        return 0.0, 0.0
+    
+    mean_time = statistics.mean(times)
+    
+    # Calculate standard deviation (use sample std dev if more than 1 value)
+    if len(times) > 1:
+        std_dev = statistics.stdev(times)
+    else:
+        std_dev = 0.0
+    
+    return mean_time, std_dev
 
 def process_running_time_files(folder_path="running_time_result"):
     """
@@ -73,7 +91,7 @@ def process_running_time_files(folder_path="running_time_result"):
                     except (json.JSONDecodeError, FileNotFoundError, KeyError) as e:
                         print(f"Error processing {filename}: {e}")
     
-    # Calculate averages and create target JSON structure
+    # Calculate averages, standard deviations and create target JSON structure
     target_json = {}
     
     for attack_model in attack_models:
@@ -87,22 +105,31 @@ def process_running_time_files(folder_path="running_time_result"):
                 if budget in data[attack_model][dataset]:
                     times = data[attack_model][dataset][budget]
                     if times:  # If we have data for this budget
-                        avg_time = sum(times) / len(times)
+                        avg_time, std_dev = calculate_stats(times)
                         target_json[attack_model][dataset].append({
                             "avg_running_time_of_5": round(avg_time, 6),
-                            "budget": budget
+                            "std_deviation": round(std_dev, 6),
+                            "avg_plus_minus_std": f"{round(avg_time, 6)} ± {round(std_dev, 6)}",
+                            "budget": budget,
+                            "number_of_runs": len(times)
                         })
                     else:
                         # No data for this budget
                         target_json[attack_model][dataset].append({
                             "avg_running_time_of_5": 0.0,
-                            "budget": budget
+                            "std_deviation": 0.0,
+                            "avg_plus_minus_std": "0.0 ± 0.0",
+                            "budget": budget,
+                            "number_of_runs": 0
                         })
                 else:
                     # No data for this budget
                     target_json[attack_model][dataset].append({
                         "avg_running_time_of_5": 0.0,
-                        "budget": budget
+                        "std_deviation": 0.0,
+                        "avg_plus_minus_std": "0.0 ± 0.0",
+                        "budget": budget,
+                        "number_of_runs": 0
                     })
     
     return target_json
@@ -112,7 +139,7 @@ def main():
     result = process_running_time_files()
     
     # Save to output file
-    output_filename = "averaged_running_times_gcn.json"
+    output_filename = "averaged_running_times_gcn_with_std.json"
     with open(output_filename, 'w') as f:
         json.dump(result, f, indent=2)
     
@@ -129,7 +156,7 @@ def main():
             if result[attack_model][dataset]:
                 budget_1_data = next((item for item in result[attack_model][dataset] if item["budget"] == 1), None)
                 if budget_1_data:
-                    print(f"    Budget 1 avg time: {budget_1_data['avg_running_time_of_5']} seconds")
+                    print(f"    Budget 1: {budget_1_data['avg_plus_minus_std']} seconds ({budget_1_data['number_of_runs']} runs)")
 
 if __name__ == "__main__":
     main()

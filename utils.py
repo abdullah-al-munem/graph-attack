@@ -111,6 +111,53 @@ def classification_margin(output, true_label):
     probs_best_second_class = probs[probs.argmax()]
     return (probs_true_label - probs_best_second_class).item()
 
+def select_nodes_v2(adj, features, labels, idx_train, idx_val, idx_test, target_gcn=None, total_nodes=200):
+    '''
+    Selects `total_nodes` from idx_test with:
+    - Top 25% highest margin (clearly correct)
+    - Bottom 25% lowest margin (but still correct)
+    - 50% random from the middle
+    '''
+    if target_gcn is None:
+        target_gcn = GCN(nfeat=features.shape[1],
+                         nhid=16,
+                         nclass=labels.max().item() + 1,
+                         dropout=0.5, device=device)
+        target_gcn = target_gcn.to(device)
+        target_gcn.fit(features, adj, labels, idx_train, idx_val, patience=30)
+
+    target_gcn.eval()
+    output = target_gcn.predict()
+
+    margin_dict = {}
+    for idx in idx_test:
+        margin = classification_margin(output[idx], labels[idx])
+        if margin < 0:
+            continue  # skip misclassified nodes
+        margin_dict[idx] = margin
+
+    sorted_margins = sorted(margin_dict.items(), key=lambda x: x[1], reverse=True)
+
+    n_high = total_nodes // 4
+    n_low = total_nodes // 4
+    n_other = total_nodes - n_high - n_low  # to handle rounding
+
+    high = [x for x, _ in sorted_margins[:n_high]]
+    low = [x for x, _ in sorted_margins[-n_low:]]
+    middle = [x for x, _ in sorted_margins[n_high:-n_low]]
+    
+    if len(middle) < n_other:
+        raise ValueError(f"Not enough middle nodes to select {n_other} from {len(middle)} candidates.")
+
+    other = np.random.choice(middle, n_other, replace=False).tolist()
+
+    return high + low + other
+
+def get_target_node_list_v2(data, total_nodes=1000):
+    adj, features, labels, idx_train, idx_val, idx_test = destructuring_dataset(data)
+    target_node_list = select_nodes_v2(adj, features, labels, idx_train, idx_val, idx_test, total_nodes=total_nodes)
+    return target_node_list
+
 
 def select_nodes(adj, features, labels, idx_train, idx_val, idx_test, target_gcn=None):
     '''
