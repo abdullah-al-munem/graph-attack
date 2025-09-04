@@ -8,21 +8,9 @@ Step 4: conda activate attack_venv
 
 Step 5: pip install -r requirements.txt
 
-Step 5: nvidia-smi (check cuda version)
+Step 6: python install_reqs.py
 
-Step 7: Install torch according to your cuda version
-# CUDA 11.8
-conda install pytorch==2.5.1  pytorch-cuda=11.8 -c pytorch -c nvidia
-# CUDA 12.1
-conda install pytorch==2.5.1 pytorch-cuda=12.1 -c pytorch -c nvidia
-# CUDA 12.4
-conda install pytorch==2.5.1 pytorch-cuda=12.4 -c pytorch -c nvidia
-# CPU Only
-conda install pytorch==2.5.1 cpuonly -c pytorch
-
-Step 8: python install_reqs.py
-
-Step 9: 
+Step 7: 
 python perform_all_attacks.py --dataset squirrel --defense_model jacgcn
 python perform_all_attacks.py --dataset chameleon --defense_model jacgcn
 
