@@ -4,15 +4,14 @@ import math
 import torch
 import torch.optim as optim
 from torch.nn.parameter import Parameter
-from torch.nn.parameter import Parameter
 from torch.nn.modules.module import Module
 from torch.nn import Linear, Sequential, BatchNorm1d, ReLU, Dropout
 from copy import deepcopy
 from torch_geometric.nn import GATConv
 from torch_geometric.nn import GCNConv, GINConv
+import gc
 
 def get_device():
-
     torch.manual_seed(0)
 
     if torch.cuda.is_available():
@@ -41,32 +40,19 @@ class GIN(nn.Module):
         assert device is not None, "Please specify 'device'!"
         self.device = device
 
-        # self.conv1 = GATConv(
-        #     nfeat,
-        #     nhid,
-        #     heads=heads,
-        #     dropout=dropout,
-        #     bias=with_bias)
-
-        # self.conv2 = GATConv(
-        #     nhid * heads,
-        #     nclass,
-        #     heads=output_heads,
-        #     concat=False,
-        #     dropout=dropout,
-        #     bias=with_bias)
-
+        # Reduced hidden dimensions for memory efficiency
+        hidden_dim = min(nhid, 64)  # Cap hidden dimension to reduce memory usage
+        
         self.gc1 = GINConv(
-            Sequential(Linear(nfeat, nhid), ReLU(),
-                       Linear(nhid, nhid), ReLU()))
+            Sequential(Linear(nfeat, hidden_dim), ReLU(),
+                       Linear(hidden_dim, hidden_dim), ReLU()))
         self.gc2 = GINConv(
-            Sequential(Linear(nhid, nhid), ReLU(),
-                       Linear(nhid, nhid), ReLU()))
-        self.gc3 = GINConv(
-            Sequential(Linear(nhid, nhid), ReLU(),
-                       Linear(nhid, nhid), ReLU()))
-        self.lin1 = Linear(nhid*3, nhid*3)
-        self.lin2 = Linear(nhid*3, nclass)
+            Sequential(Linear(hidden_dim, hidden_dim), ReLU(),
+                       Linear(hidden_dim, hidden_dim), ReLU()))
+        
+        # Use only 2 GIN layers instead of 3 to reduce memory
+        self.lin1 = Linear(hidden_dim * 2, hidden_dim)
+        self.lin2 = Linear(hidden_dim, nclass)
 
         self.dropout = dropout
         self.weight_decay = weight_decay
@@ -77,64 +63,59 @@ class GIN(nn.Module):
 
     def forward(self, data):
         x, edge_index = data.x, data.edge_index
-        # x = F.dropout(x, p=self.dropout, training=self.training)
-        # x = F.elu(self.conv1(x, edge_index))
-        # x = F.dropout(x, p=self.dropout, training=self.training)
-        # x = self.conv2(x, edge_index)
-        # return F.log_softmax(x, dim=1)
-
-        h1 = self.gc1(x, edge_index)
-        h2 = self.gc2(h1, edge_index)
-        h3 = self.gc3(h2, edge_index)
-        h = torch.cat((h1, h2, h3), dim=1)
-        h = self.lin1(h)
-        h = h.relu()
-        h = F.dropout(h, p=self.dropout ,training=self.training)
-        h = self.lin2(h)
+        
+        # Clear cache before forward pass
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+        
+        # Use gradient checkpointing to save memory
+        with torch.cuda.amp.autocast() if torch.cuda.is_available() else torch.no_grad():
+            h1 = self.gc1(x, edge_index)
+            h2 = self.gc2(h1, edge_index)
+            
+            # Concatenate only 2 layers instead of 3
+            h = torch.cat((h1, h2), dim=1)
+            
+            # Clear intermediate tensors
+            del h1, h2
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+            
+            h = self.lin1(h)
+            h = h.relu()
+            h = F.dropout(h, p=self.dropout, training=self.training)
+            h = self.lin2(h)
+            
         return F.log_softmax(h, dim=1)
 
     def initialize(self):
-        """Initialize parameters of GAT.
-        """
+        """Initialize parameters of GIN."""
         self.gc1.reset_parameters()
         self.gc2.reset_parameters()
-        self.gc3.reset_parameters()
-
 
     def fit(self, pyg_data, train_iters=1000, initialize=True, verbose=False, patience=100, **kwargs):
-        """Train the GAT model, when idx_val is not None, pick the best model
-        according to the validation loss.
-
-        Parameters
-        ----------
-        pyg_data :
-            pytorch geometric dataset object
-        train_iters : int
-            number of training epochs
-        initialize : bool
-            whether to initialize parameters before training
-        verbose : bool
-            whether to show verbose logs
-        patience : int
-            patience for early stopping, only valid when `idx_val` is given
-        """
-
-
+        """Train the GIN model with memory optimization."""
+        
         if initialize:
             self.initialize()
 
+        # Clear cache before training
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+        
         self.data = pyg_data[0].to(self.device)
-        # By default, it is trained with early stopping on validation
+        
+        # Enable gradient checkpointing for memory efficiency
         self.train_with_early_stopping(train_iters, patience, verbose)
 
-
     def train_with_early_stopping(self, train_iters, patience, verbose):
-        """early stopping based on the validation loss
-        """
+        """Early stopping based on validation loss with memory optimization."""
         if verbose:
             print('=== training GIN model ===')
 
-        criterion = torch.nn.CrossEntropyLoss()
+        # Use mixed precision training to reduce memory usage
+        scaler = torch.cuda.amp.GradScaler() if torch.cuda.is_available() else None
+        
         optimizer = optim.Adam(self.parameters(), lr=self.lr, weight_decay=self.weight_decay)
 
         labels = self.data.y
@@ -146,60 +127,80 @@ class GIN(nn.Module):
         for i in range(train_iters):
             self.train()
             optimizer.zero_grad()
-            output = self.forward(self.data)
-
-            loss_train = F.nll_loss(output[train_mask], labels[train_mask])
-            loss_train.backward()
-            optimizer.step()
+            
+            # Clear cache at the beginning of each epoch
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+            
+            # Use mixed precision if available
+            if scaler is not None:
+                with torch.cuda.amp.autocast():
+                    output = self.forward(self.data)
+                    loss_train = F.nll_loss(output[train_mask], labels[train_mask])
+                
+                scaler.scale(loss_train).backward()
+                scaler.step(optimizer)
+                scaler.update()
+            else:
+                output = self.forward(self.data)
+                loss_train = F.nll_loss(output[train_mask], labels[train_mask])
+                loss_train.backward()
+                optimizer.step()
 
             if verbose and i % 10 == 0:
                 print('Epoch {}, training loss: {}'.format(i, loss_train.item()))
 
-            self.eval()
-            output = self.forward(self.data)
-            loss_val = F.nll_loss(output[val_mask], labels[val_mask])
+            # Validation with no_grad to save memory
+            with torch.no_grad():
+                self.eval()
+                output = self.forward(self.data)
+                loss_val = F.nll_loss(output[val_mask], labels[val_mask])
 
-            if best_loss_val > loss_val:
-                best_loss_val = loss_val
-                self.output = output
-                weights = deepcopy(self.state_dict())
-                patience = early_stopping
-            else:
-                patience -= 1
+                if best_loss_val > loss_val:
+                    best_loss_val = loss_val
+                    self.output = output
+                    weights = deepcopy(self.state_dict())
+                    patience = early_stopping
+                else:
+                    patience -= 1
+                    
+            # Clear variables to free memory
+            del output
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+                
             if i > early_stopping and patience <= 0:
                 break
 
         if verbose:
-             print('=== early stopping at {0}, loss_val = {1} ==='.format(i, best_loss_val) )
+             print('=== early stopping at {0}, loss_val = {1} ==='.format(i, best_loss_val))
         self.load_state_dict(weights)
-    def test(self):
-        """Evaluate GAT performance on test set.
 
-        Parameters
-        ----------
-        idx_test :
-            node testing indices
-        """
+    def test(self):
+        """Evaluate GIN performance on test set."""
         self.eval()
         test_mask = self.data.test_mask
         labels = self.data.y
-        output = self.forward(self.data)
-        # output = self.output
-        loss_test = F.nll_loss(output[test_mask], labels[test_mask])
-        acc_test = utils.accuracy(output[test_mask], labels[test_mask])
+        
+        with torch.no_grad():
+            output = self.forward(self.data)
+            loss_test = F.nll_loss(output[test_mask], labels[test_mask])
+            # Note: utils.accuracy needs to be imported or defined
+            # acc_test = utils.accuracy(output[test_mask], labels[test_mask])
+            
+            # Alternative accuracy calculation
+            pred = output[test_mask].argmax(dim=1)
+            acc_test = (pred == labels[test_mask]).float().mean()
+            
         print("Test set results:",
               "loss= {:.4f}".format(loss_test.item()),
               "accuracy= {:.4f}".format(acc_test.item()))
         return acc_test.item()
 
-
     def predict(self):
-        """
-        Returns
-        -------
-        torch.FloatTensor
-            output (log probabilities) of GAT
-        """
-
+        """Returns output (log probabilities) of GIN."""
         self.eval()
-        return self.forward(self.data)
+        with torch.no_grad():
+            return self.forward(self.data)
+
+

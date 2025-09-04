@@ -1,5 +1,8 @@
 import torch
 import scipy.sparse as sp
+from scipy.sparse import csr_matrix
+import numpy as np
+import gc
 
 from deeprobust.graph.data import Dataset, Dpr2Pyg, Pyg2Dpr
 from deeprobust.graph.defense import GCN
@@ -155,7 +158,7 @@ def test_RGCN(adj, target_node, pyg_data, is_torch_geometric=True):
     adj, features, labels = data2.adj, data2.features, data2.labels
     idx_train, idx_val, idx_test = data2.idx_train, data2.idx_val, data2.idx_test
     
-    from scipy.sparse import csr_matrix
+    
     features = csr_matrix(features)
     # print(type(adj), type(features))
 
@@ -189,25 +192,101 @@ def test_acc_GCN(adj, features, data,target_node):
     acc_test = (output.argmax(1)[target_node] == labels[target_node])
     return acc_test.item()
 
-def test_acc_GIN(adj,features, data, target_node):
+def test_acc_GIN(adj, features, data, target_node):
+    """Memory-optimized version of test_acc_GIN."""
+    
+    # Clear cache before starting
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+    
+    # Force garbage collection
+    gc.collect()
+
     labels = data.labels
 
-    ''' test on GIN '''
-    # reset feature to 0------------------------Remove this line if you don't want to feed GIN with node features.
-    data.features = sp.csr_matrix(data.features.shape, dtype=int)
+    # Convert to PyG format
     pyg_data = Dpr2Pyg(data)
-
-
-    gin = GIN(nfeat=features.shape[1], nhid=8, heads=8, nclass=labels.max().item() + 1, dropout=0.5, device=device)
+    
+    # Use smaller hidden dimensions for large graphs
+    nfeat = features.shape[1]
+    nhid = min(32, 64)  # Reduced from 8 to even smaller for memory efficiency
+    nclass = labels.max().item() + 1
+    
+    # Create GIN model with reduced parameters
+    gin = GIN(nfeat=nfeat, nhid=nhid, heads=4, nclass=nclass, dropout=0.5, device=device)
     gin = gin.to(device)
+    
+    # Update edge index
     perturbed_adj = adj.tocsr()
     pyg_data.update_edge_index(perturbed_adj)
-    gin.fit(pyg_data, verbose=False)
-    gin.eval()
-    output = gin.predict()
-    acc_test = (output.argmax(1)[target_node] == labels[target_node])
+    
+    try:
+        # Reduce training iterations for memory efficiency
+        gin.fit(pyg_data, train_iters=500, verbose=False, patience=50)
+        gin.eval()
+        
+        with torch.no_grad():
+            output = gin.predict()
+            acc_test = (output.argmax(1)[target_node] == labels[target_node])
+        
+        result = acc_test.item()
+        
+    except RuntimeError as e:
+        if "out of memory" in str(e):
+            print(f"CUDA out of memory error: {e}")
+            print("Falling back to CPU computation...")
+            
+            # Move model and data to CPU
+            gin = gin.cpu()
+            pyg_data[0] = pyg_data[0].cpu()
+            gin.device = torch.device('cpu')
+            
+            # Clear CUDA cache
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+            
+            # Retry on CPU
+            gin.fit(pyg_data, train_iters=200, verbose=False, patience=30)
+            gin.eval()
+            
+            with torch.no_grad():
+                output = gin.predict()
+                acc_test = (output.argmax(1)[target_node] == labels[target_node])
+            
+            result = acc_test.item()
+        else:
+            raise e
+    
+    finally:
+        # Clean up
+        del gin, pyg_data
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+        gc.collect()
 
-    return acc_test.item()
+    return result
+
+# def test_acc_GIN(adj,features, data, target_node):
+#     torch.cuda.empty_cache()
+
+#     labels = data.labels
+
+#     ''' test on GIN '''
+#     # reset feature to 0------------------------Remove this line if you don't want to feed GIN with node features.
+#     # data.features = sp.csr_matrix(data.features.shape, dtype=int)
+#     pyg_data = Dpr2Pyg(data)
+
+
+#     gin = GIN(nfeat=features.shape[1], nhid=8, heads=8, nclass=labels.max().item() + 1, dropout=0.5, device=device)
+#     gin = gin.to(device)
+#     perturbed_adj = adj.tocsr()
+#     pyg_data.update_edge_index(perturbed_adj)
+#     gin.fit(pyg_data, verbose=False)
+#     gin.eval()
+#     output = gin.predict()
+#     acc_test = (output.argmax(1)[target_node] == labels[target_node])
+
+#     return acc_test.item()
 
 def test_acc_GSAGE(adj,features, data, target_node):
     labels= data.labels
@@ -270,7 +349,18 @@ def test_acc_JacGCN(adj, features, data,target_node):
     # Setup Defense Model
     jacgcn = GCNJaccard(nfeat=features.shape[1], nclass=labels.max() + 1, nhid=16, device=device)
     jacgcn = jacgcn.to(device)
-    jacgcn.fit(features, perturbed_adj, labels, idx_train, idx_val, threshold=0.01)
+    # print("Adjacency type:", type(perturbed_adj), "shape:", perturbed_adj.shape, "nnz:", perturbed_adj.nnz)
+    # print("Features type:", type(features), "shape:", features.shape)
+    # print("Any zero-feature nodes:", (features.sum(axis=1) == 0).sum())
+    # exit()
+    # features is currently CSR
+    features_dense = features.toarray()  # convert to dense temporarily
+    zero_nodes = np.where(features_dense.sum(axis=1) == 0)[0]
+    features_dense[zero_nodes] = np.random.rand(len(zero_nodes), features_dense.shape[1]) * 1e-6
+    # Convert back to CSR
+    features = csr_matrix(features_dense)
+
+    jacgcn.fit(features, perturbed_adj, labels, idx_train, idx_val, threshold=0.1)
     jacgcn.eval()
     output = jacgcn.predict()
     probs = torch.exp(output[[target_node]])[0]

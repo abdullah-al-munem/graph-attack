@@ -700,7 +700,7 @@ class ProposedAttack:
         # print(potential_edges_final)
         singleton_filter = filter_singletons(potential_edges_final, modified_adj)
         # print(singleton_filter)
-        potential_edges_final = potential_edges_final[singleton_filter]
+        potential_edges_final = potential_edges_final[singleton_filter] if np.any(singleton_filter) else edges
         # print(potential_edges_final)
         
         label_u = labels2[target_node]
@@ -727,8 +727,12 @@ class ProposedAttack:
 
             print(f"{msg} best_edge_score: {best_edge_score}, best_edge: {best_edge}")
             # potential_edges_final.remove(best_edge)
-            potential_edges_final = potential_edges_final[~np.all(potential_edges_final == best_edge, axis=1)]
-            potential_edges_final = potential_edges_final[~np.all(potential_edges_final == best_edge[::-1], axis=1)]
+            # potential_edges_final = potential_edges_final[~np.all(potential_edges_final == best_edge, axis=1)]
+            # potential_edges_final = potential_edges_final[~np.all(potential_edges_final == best_edge[::-1], axis=1)]
+            mask1 = ~np.all(potential_edges_final == best_edge, axis=1)
+            mask2 = ~np.all(potential_edges_final == best_edge[::-1], axis=1)
+            potential_edges_final = potential_edges_final[mask1 & mask2]
+
             n_perturbations -= 1
 
         print(f"added: {cnt_add}, removed: {cnt_remove}")
