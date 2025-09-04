@@ -24,7 +24,7 @@ if __name__ == "__main__":
     defense_model = 'gcn'
 
     # dataset_list = ['ogbn-arxiv', 'pubmed', 'blogcatalog']
-    dataset_list = ['ogbn-arxiv']
+    dataset_list = ['squirrel', 'chameleon']
     # dataset_list = ['cora']
     important_edge_list_dict = json.load(open("./important_edge_list.json", "r", encoding="utf-8"))
 

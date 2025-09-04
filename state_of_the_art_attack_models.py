@@ -1,4 +1,5 @@
 import os
+import gc
 import collections
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -6,7 +7,7 @@ import logging
 import warnings
 import torch
 import tqdm
-
+import torch
 from deeprobust.graph.data import Dataset, Dpr2Pyg, Pyg2Dpr
 from deeprobust.graph.defense import GCN
 from deeprobust.graph.defense import GAT
@@ -231,10 +232,27 @@ def start_attack_Nettack(dataset, defense_model, budget_range, node_list, times=
     plt.savefig(f'{root_dir}/Nettack_{dataset}_{defense_model}_{times}.png')
     # plt.show()
 
+def clear_memory():
+    # Manually delete variables and run garbage collection
+    gc.collect()
+    torch.cuda.empty_cache()  # If using GPU
+    torch.cuda.synchronize()
+
 def start_attack_SGAttack(dataset, defense_model, budget_range, node_list, times=1):
+    if dataset == "blogcatalog":
+        device = "cpu"
+    else:
+        device = get_device()
     data = get_dataset_from_deeprobust(dataset)
     adj, features, labels, idx_train, idx_val, idx_test = destructuring_dataset(data)
     pyg_data = Dpr2Pyg(data)
+    surrogate = SGC(nfeat=features.shape[1],
+                nclass=labels.max().item() + 1, K=2,
+                lr=0.01, device=device).to(device)
+            
+    surrogate.fit(pyg_data, verbose=False, patience=30, train_iters=100) 
+
+    del pyg_data
 
     acc_list = []
     acc_node = {}
@@ -247,12 +265,9 @@ def start_attack_SGAttack(dataset, defense_model, budget_range, node_list, times
         cnt = 0
         curr_acc = {1:[], 0:[]}
         for target_node in tqdm.tqdm(node_list):
-            print(f'Target node: {target_node}')
-            surrogate = SGC(nfeat=features.shape[1],
-                nclass=labels.max().item() + 1, K=2,
-                lr=0.01, device=device).to(device)
             
-            surrogate.fit(pyg_data, verbose=False, patience=30, train_iters=100)  
+            print(f'Target node: {target_node}')
+             
             model_attack = SGAttack(surrogate, attack_structure=True, attack_features=False, device=device)
             model_attack = model_attack.to(device)
             model_attack.attack(features, adj, labels, target_node, budget, direct=True)
@@ -275,6 +290,8 @@ def start_attack_SGAttack(dataset, defense_model, budget_range, node_list, times
         print(f"Total Target: {len(node_list)}")
         print('Miss-classification rate Modified : %s' % (cnt / len(node_list)))
 
+    device = torch.device('cuda')
+    
     root_dir = f"result_{dataset}_{defense_model}"
     os.makedirs(root_dir, exist_ok=True)
 

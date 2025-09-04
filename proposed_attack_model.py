@@ -30,6 +30,7 @@ from GIN import GIN
 from GSAGE import GraphSAGE
 
 import scipy.sparse as sp
+from scipy.sparse import lil_matrix
 
 from autoencoders import GAEModel, VGAEModel
 
@@ -178,6 +179,8 @@ def compute_new_a_hat_uv(potential_edges, target_node, modified_adj, adj_norm, n
         values_before = A_hat_sq[target_node].toarray()[0]
         node_ixs = np.unique(edges[:, 0], return_index=True)[1]
         twohop_ixs = np.array(A_hat_sq.nonzero()).T
+        # print(type(modified_adj))
+        # exit()
         degrees = modified_adj.sum(0).A1 + 1
 
         ixs, vals = compute_new_a_hat_uv_2(edges, node_ixs, edges_set, twohop_ixs, values_before, degrees,
@@ -647,7 +650,8 @@ class ProposedAttack:
         updated_edges = self.adj.tolist()  
          
         adj2, features2, labels2 = self.data2.adj, self.data2.features, self.data2.labels
-        modified_adj = adj2.copy().tolil()
+        # modified_adj = adj2.copy().tolil()
+        modified_adj = lil_matrix(adj2.copy())
         if isinstance(features2, np.ndarray):
             features2 = sp.csr_matrix(features2)
         # print(features2)

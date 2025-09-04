@@ -18,6 +18,10 @@ from torch_geometric.utils import to_undirected
 
 from torch_geometric.data.data import DataEdgeAttr
 torch.serialization.add_safe_globals([DataEdgeAttr])
+from torch_geometric.datasets import WikipediaNetwork
+from torch_geometric.data import Data
+import dgl
+
 
 warnings.simplefilter('ignore')
 
@@ -45,31 +49,124 @@ def clear_memory():
     # Manually delete variables and run garbage collection
     gc.collect()
     torch.cuda.empty_cache()  # If using GPU
+    torch.cuda.synchronize()
 
-def get_dataset_from_deeprobust(dataset):
+# def get_dataset_from_deeprobust(dataset):
+#     clear_memory()  # Free memory before loading new dataset
+    
+#     if dataset == 'ogbn-arxiv':
+#         pyg_data = PygNodePropPredDataset(name=dataset)
+#         pyg_graph = pyg_data
+
+#         # Step 2: Make edge_index bidirectional (undirected)
+#         edge_index = pyg_graph.edge_index
+#         edge_index = to_undirected(edge_index)
+#         pyg_graph.edge_index = edge_index
+
+#         # Step 3: Convert to DeepRobust-compatible format
+#         data = Pyg2Dpr(pyg_graph)
+
+#         # Step 4: Ensure features and adjacency matrix are in the correct format
+#         data.features = sp.csr_matrix(data.features)
+#         data.adj = sp.csr_matrix((np.ones(edge_index.shape[1]), 
+#                                 (edge_index[0].numpy(), edge_index[1].numpy())),
+#                                 shape=(data.features.shape[0], data.features.shape[0]))
+
+#     else:
+#         data = Dataset(root=r'./', name=dataset) 
+#     return data
+
+def dgl_to_pyg(dgl_graph, node_features, labels, train_mask, val_mask, test_mask):
+    """Convert DGL graph to PyTorch Geometric format"""
+    # Get edge indices
+    src, dst = dgl_graph.edges()
+    edge_index = torch.stack([src, dst], dim=0)
+    
+    # Create PyG Data object
+    pyg_data = Data(
+        x=node_features,
+        edge_index=edge_index,
+        y=labels,
+        train_mask=train_mask,
+        val_mask=val_mask,
+        test_mask=test_mask
+    )
+    
+    return pyg_data
+
+def create_deeprobust_data_from_dgl(dgl_graph):
+    """Create DeepRobust compatible data directly from DGL graph"""
+    # Extract data from DGL graph
+    node_features = dgl_graph.ndata['feat']
+    labels = dgl_graph.ndata['label']
+    train_mask = dgl_graph.ndata['train_mask']
+    val_mask = dgl_graph.ndata['val_mask']
+    test_mask = dgl_graph.ndata['test_mask']
+    
+    # Get edge indices and make undirected
+    src, dst = dgl_graph.edges()
+    edge_index = torch.stack([src, dst], dim=0)
+    edge_index = to_undirected(edge_index)
+    
+    # Create a simple data object similar to DeepRobust format
+    class SimpleData:
+        def __init__(self):
+            pass
+    
+    data = SimpleData()
+    data.features = sp.csr_matrix(node_features.numpy())
+    data.labels = labels.numpy()
+    data.idx_train = torch.where(train_mask)[0].numpy()
+    data.idx_val = torch.where(val_mask)[0].numpy()
+    data.idx_test = torch.where(test_mask)[0].numpy()
+    
+    # Create adjacency matrix
+    num_nodes = node_features.shape[0]
+    data.adj = sp.csr_matrix((np.ones(edge_index.shape[1]), 
+                              (edge_index[0].numpy(), edge_index[1].numpy())),
+                              shape=(num_nodes, num_nodes))
+    
+    return data
+
+def get_dataset_from_deeprobust(dataset): 
     clear_memory()  # Free memory before loading new dataset
     
     if dataset == 'ogbn-arxiv':
         pyg_data = PygNodePropPredDataset(name=dataset)
-        pyg_graph = pyg_data
+        pyg_graph = pyg_data[0]
 
-        # Step 2: Make edge_index bidirectional (undirected)
-        edge_index = pyg_graph.edge_index
-        edge_index = to_undirected(edge_index)
+        edge_index = to_undirected(pyg_graph.edge_index)
         pyg_graph.edge_index = edge_index
 
-        # Step 3: Convert to DeepRobust-compatible format
         data = Pyg2Dpr(pyg_graph)
-
-        # Step 4: Ensure features and adjacency matrix are in the correct format
         data.features = sp.csr_matrix(data.features)
         data.adj = sp.csr_matrix((np.ones(edge_index.shape[1]), 
-                                (edge_index[0].numpy(), edge_index[1].numpy())),
-                                shape=(data.features.shape[0], data.features.shape[0]))
+                                  (edge_index[0].numpy(), edge_index[1].numpy())),
+                                  shape=(data.features.shape[0], data.features.shape[0]))
+        return data
+
+    elif dataset.lower() == 'squirrel':
+        # Use DGL SquirrelDataset
+        dgl_dataset = dgl.data.SquirrelDataset()
+        dgl_graph = dgl_dataset[0]
+        
+        # Create DeepRobust compatible data directly
+        data = create_deeprobust_data_from_dgl(dgl_graph)
+        return data
+
+    elif dataset.lower() == 'chameleon':
+        # Use DGL ChameleonDataset
+        dgl_dataset = dgl.data.ChameleonDataset()
+        dgl_graph = dgl_dataset[0]
+        
+        # Create DeepRobust compatible data directly
+        data = create_deeprobust_data_from_dgl(dgl_graph)
+        return data
 
     else:
-        data = Dataset(root=r'./', name=dataset) 
-    return data
+        data = Dataset(root='./', name=dataset) 
+        return data
+
 
 def destructuring_dataset(data):
     adj, features, labels = data.adj, data.features, data.labels

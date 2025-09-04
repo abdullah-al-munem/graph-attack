@@ -1,6 +1,6 @@
 import os
 import glob
-# os.environ["CUDA_VISIBLE_DEVICES"] = "1" 
+os.environ["CUDA_VISIBLE_DEVICES"] = "1" 
 import logging
 import warnings
 import pandas as pd
@@ -65,6 +65,8 @@ if __name__ == "__main__":
 
     defense_model_list = ['gcn', 'gin', 'gat', 'graphsage', 'rgcn', 'mdgcn', 'jacgcn', 'svdgcn']
     dataset_list = ['cora', 'citeseer', 'polblogs', 'ogbn-arxiv', 'pubmed', 'blogcatalog']
+    dataset_heterophily = ['squirrel', 'chameleon']
+    defense_heterophily = ['H2GCN', 'FAGCN', 'GPRGNN', 'GeomGCN']
 
     # Set surrogate_model as optional with a default value
     parser.add_argument('--surrogate_model', type=str, default='gcn',

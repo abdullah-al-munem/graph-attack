@@ -14,6 +14,8 @@ def run_shell_command(command):
         print(f"Error occurred while running command: {command}")
         print(e)
 
+run_shell_command("pip install  dgl -f https://data.dgl.ai/wheels/torch-2.4/cu124/repo.html")
+
 print(f"pip install -q torch-scatter -f https://data.pyg.org/whl/torch-{os.environ['TORCH']}.html")
 # Install torch-scatter
 run_shell_command(f"pip install -q torch-scatter -f https://data.pyg.org/whl/torch-{os.environ['TORCH']}.html")

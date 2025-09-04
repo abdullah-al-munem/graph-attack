@@ -86,6 +86,7 @@ def test_GAT(adj, target_node, pyg_data, is_torch_geometric=True):
 
 def test_GIN(adj, target_node, pyg_data, is_torch_geometric=True):
     ''' test on GIN '''
+    # device = "cpu"
     # pyg_data = Dpr2Pyg(pyg_data)
     if is_torch_geometric:
         perturbed_adj = adj.t()  
@@ -106,7 +107,7 @@ def test_GIN(adj, target_node, pyg_data, is_torch_geometric=True):
     probs = torch.exp(output[[target_node]])[0]
     # acc_test = accuracy(output[[target_node]], labels[target_node])
     acc_test = (output.argmax(1)[target_node] == labels[target_node])
-
+    # device = torch.device('cuda')
     return acc_test.item()
 
 def test_GraphSAGE(adj, target_node, pyg_data, is_torch_geometric=True):
