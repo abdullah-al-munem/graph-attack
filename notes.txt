@@ -1,0 +1,59 @@
+Step 1: git clone https://github.com/abdullah-al-munem/graph-attack.git
+
+Step 2: git checkout stable_version
+
+Step 3: conda create -n attack_venv python=3.10 -y 
+
+Step 4: conda activate attack_venv
+
+Step 5: pip install -r requirements.txt
+
+Step 5: nvidia-smi (check cuda version)
+
+Step 7: Install torch according to your cuda version
+# CUDA 11.8
+conda install pytorch==2.5.1  pytorch-cuda=11.8 -c pytorch -c nvidia
+# CUDA 12.1
+conda install pytorch==2.5.1 pytorch-cuda=12.1 -c pytorch -c nvidia
+# CUDA 12.4
+conda install pytorch==2.5.1 pytorch-cuda=12.4 -c pytorch -c nvidia
+# CPU Only
+conda install pytorch==2.5.1 cpuonly -c pytorch
+
+Step 8: python install_reqs.py
+
+Step 9: 
+python perform_all_attacks.py --dataset squirrel --defense_model jacgcn
+python perform_all_attacks.py --dataset chameleon --defense_model jacgcn
+
+python perform_all_attacks.py --dataset squirrel --defense_model svdgcn
+python perform_all_attacks.py --dataset chameleon --defense_model svdgcn
+
+python perform_all_attacks.py --dataset squirrel --defense_model graphsage
+python perform_all_attacks.py --dataset chameleon --defense_model graphsage
+
+python perform_all_attacks.py --dataset squirrel --defense_model gin
+python perform_all_attacks.py --dataset chameleon --defense_model gin
+
+python perform_all_attacks.py --dataset blogcatalog --defense_model graphsage
+python perform_all_attacks.py --dataset blogcatalog --defense_model gin
+
+python perform_all_attacks.py --dataset ogbn-arxiv --defense_model rgcn
+python perform_all_attacks.py --dataset ogbn-arxiv --defense_model jacgcn
+python perform_all_attacks.py --dataset ogbn-arxiv --defense_model svdgcn
+
+python perform_all_attacks.py --dataset ogbn-arxiv --defense_model gcn
+python perform_all_attacks.py --dataset ogbn-arxiv --defense_model graphsage
+python perform_all_attacks.py --dataset ogbn-arxiv --defense_model gin
+
+Done:
+result_blogcatalog_gcn
+result_blogcatalog_jacgcn
+result_blogcatalog_rgcn
+result_blogcatalog_svdgcn
+
+result_chameleon_gcn
+result_chameleon_rgcn
+
+result_squirrel_gcn
+result_squirrel_rgcn
