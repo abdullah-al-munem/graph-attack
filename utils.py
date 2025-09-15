@@ -1,4 +1,5 @@
 import os
+
 import gc
 import warnings
 import torch
@@ -20,6 +21,8 @@ from torch_geometric.data.data import DataEdgeAttr
 torch.serialization.add_safe_globals([DataEdgeAttr])
 from torch_geometric.datasets import WikipediaNetwork
 from torch_geometric.data import Data
+os.environ["DGLBACKEND"] = "pytorch"
+os.environ["DGL_NO_GRAPHBOLT"] = "1"
 import dgl
 
 
