@@ -298,21 +298,22 @@ def struct_score(a_hat_uv, XW, label_u):
 
     return struct_scores
 
-def get_scores_and_egdes(filtered_edges, modified_features, target_node, W, label_u, modified_adj, adj_norm, nnodes):
+# def get_scores_and_egdes(filtered_edges, modified_features, target_node, W, label_u, modified_adj, adj_norm, nnodes):
 
-    # potential_edges = potential_edges.astype("int32")
-    # singleton_filter = filter_singletons(potential_edges, modified_adj)
-    # filtered_edges = potential_edges[singleton_filter]
+#     # potential_edges = potential_edges.astype("int32")
+#     # singleton_filter = filter_singletons(potential_edges, modified_adj)
+#     # filtered_edges = potential_edges[singleton_filter]
+    
 
-    # Compute new entries in A_hat_square_uv
-    a_hat_uv_new = compute_new_a_hat_uv(filtered_edges, target_node, modified_adj, adj_norm, nnodes)
-    # Compute the struct scores for each potential edge
-    struct_scores = struct_score(a_hat_uv_new, modified_features @ W, label_u)
-    best_edge_ix = struct_scores.argmin()
-    best_edge_score = struct_scores.min()
-    best_edge = filtered_edges[best_edge_ix]
+#     # Compute new entries in A_hat_square_uv
+#     a_hat_uv_new = compute_new_a_hat_uv(filtered_edges, target_node, modified_adj, adj_norm, nnodes)
+#     # Compute the struct scores for each potential edge
+#     struct_scores = struct_score(a_hat_uv_new, modified_features @ W, label_u)
+#     best_edge_ix = struct_scores.argmin()
+#     best_edge_score = struct_scores.min()
+#     best_edge = filtered_edges[best_edge_ix]
 
-    return [best_edge_score, best_edge]
+#     return [best_edge_score, best_edge]
 
 def filter_singletons(edges, adj):
     """
@@ -336,6 +337,43 @@ def filter_singletons(edges, adj):
     zeros = edge_degrees == 0
     zeros_sum = zeros.sum(1)
     return zeros_sum == 0
+
+
+def update_Sx(S_old, n_old, d_old, d_new, d_min):
+    """
+    Update on the sum of log degrees S_d and n based on degree distribution resulting from inserting or deleting
+    a single edge.
+    """
+
+    old_in_range = d_old >= d_min
+    new_in_range = d_new >= d_min
+
+    d_old_in_range = np.multiply(d_old, old_in_range)
+    d_new_in_range = np.multiply(d_new, new_in_range)
+
+    new_S_d = S_old - np.log(np.maximum(d_old_in_range, 1)).sum(1) + np.log(np.maximum(d_new_in_range, 1)).sum(1)
+    new_n = n_old - np.sum(old_in_range, 1) + np.sum(new_in_range, 1)
+
+    return new_S_d, new_n
+
+def compute_alpha(n, S_d, d_min):
+    """
+    Approximate the alpha of a power law distribution.
+
+    """
+
+    return n / (S_d - n * np.log(d_min - 0.5)) + 1
+
+def compute_log_likelihood(n, alpha, S_d, d_min):
+    """
+    Compute log likelihood of the powerlaw fit.
+
+    """
+
+    return n * np.log(alpha) + n * alpha * np.log(d_min) - (alpha + 1) * S_d
+
+def filter_chisquare(ll_ratios, cutoff):
+    return ll_ratios < cutoff
 
 predict_classes = {
     'gcn': test_acc_GCN,
@@ -373,7 +411,51 @@ class ProposedAttack:
     def get_predict_function(self):
         
         return predict_classes[self.defense_model]
+    
+    def get_scores_and_egdes(self, filtered_edges, modified_features, target_node, W, label_u, modified_adj, ori_adj, adj_norm, nnodes):
+
+        # potential_edges = potential_edges.astype("int32")
+        # singleton_filter = filter_singletons(potential_edges, modified_adj)
+        # filtered_edges = potential_edges[singleton_filter]
         
+        # Update the values for the power law likelihood ratio test.
+        ll_cutoff = 0.004
+        d_min = 2
+        degree_sequence_start = ori_adj.sum(0).A1
+        current_degree_sequence = modified_adj.sum(0).A1
+        current_S_d = np.sum(np.log(current_degree_sequence[current_degree_sequence >= d_min]))
+        current_n = np.sum(current_degree_sequence >= d_min)
+        n_start = np.sum(degree_sequence_start >= d_min)
+        S_d_start = np.sum(np.log(degree_sequence_start[degree_sequence_start >= d_min]))
+        alpha_start = compute_alpha(n_start, S_d_start, d_min)
+        log_likelihood_orig = compute_log_likelihood(n_start, alpha_start, S_d_start, d_min)
+
+        deltas = 2 * (1 - modified_adj[tuple(filtered_edges.T)].toarray()[0] )- 1
+        d_edges_old = current_degree_sequence[filtered_edges]
+        d_edges_new = current_degree_sequence[filtered_edges] + deltas[:, None]
+        new_S_d, new_n = update_Sx(current_S_d, current_n, d_edges_old, d_edges_new, d_min)
+        new_alphas = compute_alpha(new_n, new_S_d, d_min)
+        new_ll = compute_log_likelihood(new_n, new_alphas, new_S_d, d_min)
+        alphas_combined = compute_alpha(new_n + n_start, new_S_d + S_d_start, d_min)
+        new_ll_combined = compute_log_likelihood(new_n + n_start, alphas_combined, new_S_d + S_d_start, d_min)
+        new_ratios = -2 * new_ll_combined + 2 * (new_ll + log_likelihood_orig)
+
+        # Do not consider edges that, if added/removed, would lead to a violation of the
+        # likelihood ration Chi_square cutoff value.
+        powerlaw_filter = filter_chisquare(new_ratios, ll_cutoff)
+        filtered_edges = filtered_edges[powerlaw_filter]
+
+
+        # Compute new entries in A_hat_square_uv
+        a_hat_uv_new = compute_new_a_hat_uv(filtered_edges, target_node, modified_adj, adj_norm, nnodes)
+        # Compute the struct scores for each potential edge
+        struct_scores = struct_score(a_hat_uv_new, modified_features @ W, label_u)
+        best_edge_ix = struct_scores.argmin()
+        best_edge_score = struct_scores.min()
+        best_edge = filtered_edges[best_edge_ix]
+
+        return [best_edge_score, best_edge]
+
     def get_tained_surrogate_model_accuracy(self, modified_adj, target_node):
         features = self.data2.features
         n = self.pyg_data[0].num_nodes
@@ -656,6 +738,7 @@ class ProposedAttack:
             features2 = sp.csr_matrix(features2)
         # print(features2)
         # print(type(features2))
+        ori_adj = modified_adj.copy()
         modified_features = features2.copy().tolil()
         adj_norm = normalize_adj(modified_adj)
         nnodes = adj2.shape[0]
@@ -665,7 +748,7 @@ class ProposedAttack:
 
         final_prune_list = np.array(final_prune_list).astype("int32")
 
-        final_prune_list = final_prune_list[:20]
+        final_prune_list = final_prune_list[:100]
         
         singleton_filter = filter_singletons(final_prune_list, modified_adj)
         final_prune_list = final_prune_list[singleton_filter]
@@ -700,8 +783,9 @@ class ProposedAttack:
         # print(potential_edges_final)
         singleton_filter = filter_singletons(potential_edges_final, modified_adj)
         # print(singleton_filter)
-        potential_edges_final = potential_edges_final[singleton_filter] if np.any(singleton_filter) else edges
+        potential_edges_final = potential_edges_final[singleton_filter] if np.any(singleton_filter) else potential_edges_final
         # print(potential_edges_final)
+
         
         label_u = labels2[target_node]
         cnt_add = 0
@@ -712,7 +796,7 @@ class ProposedAttack:
         # if len(potential_edges_final) < n_perturbations:
 
         while n_perturbations:
-            best_edge_score, best_edge = get_scores_and_egdes(potential_edges_final, modified_features, target_node, self.W, label_u, modified_adj, adj_norm, nnodes)
+            best_edge_score, best_edge = self.get_scores_and_egdes(potential_edges_final, modified_features, target_node, self.W, label_u, modified_adj, ori_adj, adj_norm, nnodes)
 
             modified_adj[tuple(best_edge)] = modified_adj[tuple(best_edge[::-1])] = 1 - modified_adj[tuple(best_edge)]
             adj_norm = normalize_adj(modified_adj)
@@ -853,19 +937,19 @@ if __name__ == "__main__":
     '''
 
     surrogate_model = 'gcn'
-    # dataset = 'cora'
+    dataset = 'cora'
     defense_model = 'gcn'
 
-    # data = get_dataset_from_deeprobust(dataset=dataset)
+    data = get_dataset_from_deeprobust(dataset=dataset)
     # print("Dataset loaded...")
-    # budget_range = 7
+    budget_range = 7
 
     # node_list = [929, 1342, 1554, 1255, 2406, 1163, 1340, 2077, 1347, 1820, 429, 1267, 1068, 1223, 1330, 1959, 2469, 1343, 1070, 2355, 1829, 482, 2035, 615, 1441, 23, 582, 875, 1309, 2256, 2396, 2228, 336, 463, 2142, 603, 2423, 2109, 846, 117]
-    # node_list = get_target_node_list(data)
+    node_list = get_target_node_list(data)
     # node_list = [1079,]
     # print("Targegt nodes are being selected...")
 
-    # start_attack_proposed_model(surrogate_model, dataset, defense_model, budget_range, node_list)
+    start_attack_proposed_model(surrogate_model, dataset, defense_model, budget_range, node_list)
 
     # dataset_list = ['cora', 'citeseer', 'polblogs']
     # important_edge_list_dict = {}

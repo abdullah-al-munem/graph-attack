@@ -2,7 +2,7 @@
 
 
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = f"0"
+os.environ["CUDA_VISIBLE_DEVICES"] = f"1"
 
 import time
 import json
@@ -41,7 +41,7 @@ def convert_time(seconds):
 def parse_arguments():
     parser = argparse.ArgumentParser(description='Run time experiments for graph neural network attacks')
     parser.add_argument('--dataset', type=str, required=True, 
-                       choices=['cora', 'citeseer', 'polblogs'],
+                       choices=['cora', 'citeseer', 'polblogs', 'blogcatalog'],
                        help='Dataset to use for experiments')
     parser.add_argument('--defense_model', type=str, required=True,
                        choices=['gcn', 'gin', 'gat', 'graphsage', 'rgcn', 'mdgcn', 'jacgcn', 'svdgcn'],
@@ -81,6 +81,7 @@ if __name__ == "__main__":
 
     defense_model_list = ['gcn', 'gin', 'graphsage', 'rgcn', 'mdgcn', 'jacgcn', 'svdgcn']
     dataset_list = ['cora', 'citeseer', 'polblogs']
+    dataset_list = ['blogcatalog']
     # python test_time.py --dataset polblogs --defense_model gcn --gpu_id 0
     # python test_time.py --dataset polblogs --defense_model gin --gpu_id 0
     # python test_time.py --dataset polblogs --defense_model graphsage --gpu_id 0
@@ -158,6 +159,14 @@ if __name__ == "__main__":
             flush_gpu_memory()  # Flush after each attack
 
         
+            print(f"Nettack has started...")
+            running_time_minutes, running_time_seconds = start_attack_Nettack(dataset, defense_model, budget_range, node_list, time_)
+            # data_time["Nettack"].append({
+            #     "running_time": f"{int(running_time_minutes)} minutes, {running_time_seconds} seconds",
+            #     "budget": budget_range
+            # })
+            flush_gpu_memory()  # Flush after each attack
+
             print(f"Nettack has started...")
             running_time_minutes, running_time_seconds = start_attack_Nettack(dataset, defense_model, budget_range, node_list, time_)
             data_time["Nettack"].append({

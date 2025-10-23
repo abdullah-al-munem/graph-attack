@@ -131,23 +131,33 @@ def start_attack_Nettack(dataset, defense_model, budget_range, node_list, times=
     return running_time_minutes, running_time_seconds
             
 def start_attack_SGAttack(dataset, defense_model, budget_range, node_list, times=1):
+    if dataset == "blogcatalog":
+        device = "cpu"
+    else:
+        device = get_device()
     data = get_dataset_from_deeprobust(dataset)
     adj, features, labels, idx_train, idx_val, idx_test = destructuring_dataset(data)
     pyg_data = Dpr2Pyg(data)
-
-    predict = get_predict_function(defense_model)
     start_time = time.time()
+    surrogate = SGC(nfeat=features.shape[1],
+                nclass=labels.max().item() + 1, K=2,
+                lr=0.01, device=device).to(device)
+            
+    surrogate.fit(pyg_data, verbose=False, patience=30, train_iters=100) 
+
+    del pyg_data
+
+    acc_list = []
+    acc_node = {}
+    
     print(f"For budget number: {budget_range}")
     
     cnt = 0
     curr_acc = {1:[], 0:[]}
     for target_node in tqdm.tqdm(node_list):
-        print(f'Target node: {target_node}')
-        surrogate = SGC(nfeat=features.shape[1],
-            nclass=labels.max().item() + 1, K=2,
-            lr=0.01, device=device).to(device)
         
-        surrogate.fit(pyg_data, verbose=False, patience=30, train_iters=100)  
+        print(f'Target node: {target_node}')
+            
         model_attack = SGAttack(surrogate, attack_structure=True, attack_features=False, device=device)
         model_attack = model_attack.to(device)
         model_attack.attack(features, adj, labels, target_node, budget_range, direct=True)

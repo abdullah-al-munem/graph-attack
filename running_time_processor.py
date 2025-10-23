@@ -49,7 +49,7 @@ def process_running_time_files(folder_path="running_time_result"):
     # Define the models and datasets
     attack_models = ['Proposed_model', 'Random_attack', 'FGA', 'Nettack', 'SGAttack_attack']
     datasets = ['cora', 'citeseer', 'polblogs']
-    
+    datasets = ['blogcatalog']
     # Dictionary to store all data: {attack_model: {dataset: {budget: [times]}}}
     data = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
     

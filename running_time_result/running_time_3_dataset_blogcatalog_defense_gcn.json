@@ -1,0 +1,152 @@
+{
+    "Proposed_model": [
+        {
+            "running_time": "0 minutes, 12.272066593170166 seconds",
+            "budget": 1
+        },
+        {
+            "running_time": "0 minutes, 15.481353998184204 seconds",
+            "budget": 2
+        },
+        {
+            "running_time": "0 minutes, 19.781656503677368 seconds",
+            "budget": 3
+        },
+        {
+            "running_time": "0 minutes, 23.36615538597107 seconds",
+            "budget": 4
+        },
+        {
+            "running_time": "0 minutes, 26.94685435295105 seconds",
+            "budget": 5
+        },
+        {
+            "running_time": "0 minutes, 30.493857383728027 seconds",
+            "budget": 6
+        },
+        {
+            "running_time": "0 minutes, 34.557708740234375 seconds",
+            "budget": 7
+        }
+    ],
+    "Random_attack": [
+        {
+            "running_time": "0 minutes, 0.10491371154785156 seconds",
+            "budget": 1
+        },
+        {
+            "running_time": "0 minutes, 0.13464927673339844 seconds",
+            "budget": 2
+        },
+        {
+            "running_time": "0 minutes, 0.10588693618774414 seconds",
+            "budget": 3
+        },
+        {
+            "running_time": "0 minutes, 0.09777569770812988 seconds",
+            "budget": 4
+        },
+        {
+            "running_time": "0 minutes, 0.09794402122497559 seconds",
+            "budget": 5
+        },
+        {
+            "running_time": "0 minutes, 0.09644818305969238 seconds",
+            "budget": 6
+        },
+        {
+            "running_time": "0 minutes, 0.09893536567687988 seconds",
+            "budget": 7
+        }
+    ],
+    "FGA": [
+        {
+            "running_time": "0 minutes, 3.21714448928833 seconds",
+            "budget": 1
+        },
+        {
+            "running_time": "0 minutes, 3.544640302658081 seconds",
+            "budget": 2
+        },
+        {
+            "running_time": "0 minutes, 3.9548287391662598 seconds",
+            "budget": 3
+        },
+        {
+            "running_time": "0 minutes, 4.306764841079712 seconds",
+            "budget": 4
+        },
+        {
+            "running_time": "0 minutes, 4.700275897979736 seconds",
+            "budget": 5
+        },
+        {
+            "running_time": "0 minutes, 5.089701890945435 seconds",
+            "budget": 6
+        },
+        {
+            "running_time": "0 minutes, 5.466463804244995 seconds",
+            "budget": 7
+        }
+    ],
+    "Nettack": [
+        {
+            "running_time": "0 minutes, 29.670312643051147 seconds",
+            "budget": 1
+        },
+        {
+            "running_time": "0 minutes, 51.1462516784668 seconds",
+            "budget": 2
+        },
+        {
+            "running_time": "1 minutes, 7.472365856170654 seconds",
+            "budget": 3
+        },
+        {
+            "running_time": "1 minutes, 25.80940079689026 seconds",
+            "budget": 4
+        },
+        {
+            "running_time": "1 minutes, 47.52621388435364 seconds",
+            "budget": 5
+        },
+        {
+            "running_time": "2 minutes, 6.496762275695801 seconds",
+            "budget": 6
+        },
+        {
+            "running_time": "2 minutes, 29.15561270713806 seconds",
+            "budget": 7
+        }
+    ],
+    "SGAttack_attack": [
+        {
+            "running_time": "0 minutes, 10.933185815811157 seconds",
+            "budget": 1
+        },
+        {
+            "running_time": "0 minutes, 11.74398946762085 seconds",
+            "budget": 2
+        },
+        {
+            "running_time": "0 minutes, 10.680521488189697 seconds",
+            "budget": 3
+        },
+        {
+            "running_time": "0 minutes, 10.718124866485596 seconds",
+            "budget": 4
+        },
+        {
+            "running_time": "0 minutes, 11.17138147354126 seconds",
+            "budget": 5
+        },
+        {
+            "running_time": "0 minutes, 10.997292280197144 seconds",
+            "budget": 6
+        },
+        {
+            "running_time": "0 minutes, 11.783652067184448 seconds",
+            "budget": 7
+        }
+    ]
+}
