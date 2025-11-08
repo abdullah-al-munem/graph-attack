@@ -135,17 +135,30 @@ def get_dataset_from_deeprobust(dataset):
     clear_memory()  # Free memory before loading new dataset
     
     if dataset == 'ogbn-arxiv':
-        pyg_data = PygNodePropPredDataset(name=dataset)
-        pyg_graph = pyg_data[0]
+        # pyg_data = PygNodePropPredDataset(name=dataset)
+        # pyg_graph = pyg_data[0]
 
-        edge_index = to_undirected(pyg_graph.edge_index)
-        pyg_graph.edge_index = edge_index
+        # edge_index = to_undirected(pyg_graph.edge_index)
+        # pyg_graph.edge_index = edge_index
 
-        data = Pyg2Dpr(pyg_graph)
-        data.features = sp.csr_matrix(data.features)
-        data.adj = sp.csr_matrix((np.ones(edge_index.shape[1]), 
-                                  (edge_index[0].numpy(), edge_index[1].numpy())),
-                                  shape=(data.features.shape[0], data.features.shape[0]))
+        # data = Pyg2Dpr(pyg_graph)
+        # data.features = sp.csr_matrix(data.features)
+        # data.adj = sp.csr_matrix((np.ones(edge_index.shape[1]), 
+        #                           (edge_index[0].numpy(), edge_index[1].numpy())),
+        #                           shape=(data.features.shape[0], data.features.shape[0]))
+        pyg_ds = PygNodePropPredDataset(name=dataset)
+
+        # Let Pyg2Dpr pull pyg_ds[0] itself
+        data = Pyg2Dpr(pyg_ds)
+
+        # (Optional) If you still want an undirected adj, rebuild it:
+        edge_index = to_undirected(pyg_ds[0].edge_index)
+        row = edge_index[0].cpu().numpy()
+        col = edge_index[1].cpu().numpy()
+        data.features = sp.csr_matrix(data.features)  # ensure csr
+        data.adj = sp.csr_matrix((np.ones_like(row), (row, col)),
+                             shape=(data.features.shape[0], data.features.shape[0]))
+
         return data
 
     elif dataset.lower() == 'squirrel':
