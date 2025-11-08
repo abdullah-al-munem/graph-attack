@@ -1,0 +1,493 @@
+================================================================================
+COMPREHENSIVE GAETTACK EXPERIMENTAL RESULTS
+================================================================================
+
+================================================================================
+1. OVERALL STATISTICS (Total Tasks: 120)
+================================================================================
+
+Attack          Highest              2nd Highest          3rd Highest         
+--------------------------------------------------------------------------------
+Random            7 out of 120 tasks   15 out of 120 tasks   15 out of 120 tasks
+FGA               0 out of 120 tasks    4 out of 120 tasks   13 out of 120 tasks
+Nettack           7 out of 120 tasks   39 out of 120 tasks   48 out of 120 tasks
+SGAttack         13 out of 120 tasks   19 out of 120 tasks   24 out of 120 tasks
+GOttack          51 out of 120 tasks   30 out of 120 tasks   15 out of 120 tasks
+GAEttack         54 out of 120 tasks   32 out of 120 tasks   23 out of 120 tasks
+
+================================================================================
+2. PER-DATASET BREAKDOWN
+================================================================================
+
+
+--------------------------------------------------------------------------------
+Dataset: Cora (30 tasks: 6 models × 5 budgets)
+--------------------------------------------------------------------------------
+Attack          Highest              2nd Highest          3rd Highest         
+--------------------------------------------------------------------------------
+Random           0 out of 30 tasks    4 out of 30 tasks    2 out of 30 tasks
+FGA              0 out of 30 tasks    2 out of 30 tasks    1 out of 30 tasks
+Nettack          1 out of 30 tasks   11 out of 30 tasks   14 out of 30 tasks
+SGAttack         3 out of 30 tasks    4 out of 30 tasks    3 out of 30 tasks
+GOttack         14 out of 30 tasks    8 out of 30 tasks    4 out of 30 tasks
+GAEttack        14 out of 30 tasks    6 out of 30 tasks    7 out of 30 tasks
+
+
+--------------------------------------------------------------------------------
+Dataset: Citeseer (30 tasks: 6 models × 5 budgets)
+--------------------------------------------------------------------------------
+Attack          Highest              2nd Highest          3rd Highest         
+--------------------------------------------------------------------------------
+Random           1 out of 30 tasks    5 out of 30 tasks    3 out of 30 tasks
+FGA              0 out of 30 tasks    0 out of 30 tasks    1 out of 30 tasks
+Nettack          0 out of 30 tasks    6 out of 30 tasks   15 out of 30 tasks
+SGAttack         5 out of 30 tasks    5 out of 30 tasks    1 out of 30 tasks
+GOttack         17 out of 30 tasks    9 out of 30 tasks    4 out of 30 tasks
+GAEttack        12 out of 30 tasks    8 out of 30 tasks    7 out of 30 tasks
+
+
+--------------------------------------------------------------------------------
+Dataset: Polblogs (30 tasks: 6 models × 5 budgets)
+--------------------------------------------------------------------------------
+Attack          Highest              2nd Highest          3rd Highest         
+--------------------------------------------------------------------------------
+Random           5 out of 30 tasks    6 out of 30 tasks    8 out of 30 tasks
+FGA              0 out of 30 tasks    2 out of 30 tasks    5 out of 30 tasks
+Nettack          0 out of 30 tasks    8 out of 30 tasks   12 out of 30 tasks
+SGAttack         5 out of 30 tasks    1 out of 30 tasks    3 out of 30 tasks
+GOttack         12 out of 30 tasks    6 out of 30 tasks    4 out of 30 tasks
+GAEttack         9 out of 30 tasks   14 out of 30 tasks    5 out of 30 tasks
+
+
+--------------------------------------------------------------------------------
+Dataset: BlogCatalog (30 tasks: 6 models × 5 budgets)
+--------------------------------------------------------------------------------
+Attack          Highest              2nd Highest          3rd Highest         
+--------------------------------------------------------------------------------
+Random           1 out of 30 tasks    0 out of 30 tasks    2 out of 30 tasks
+FGA              0 out of 30 tasks    0 out of 30 tasks    6 out of 30 tasks
+Nettack          6 out of 30 tasks   14 out of 30 tasks    7 out of 30 tasks
+SGAttack         0 out of 30 tasks    9 out of 30 tasks   17 out of 30 tasks
+GOttack          8 out of 30 tasks    7 out of 30 tasks    3 out of 30 tasks
+GAEttack        19 out of 30 tasks    4 out of 30 tasks    4 out of 30 tasks
+
+================================================================================
+3. PER-MODEL BREAKDOWN
+================================================================================
+
+
+--------------------------------------------------------------------------------
+Model: GCN (20 tasks: 4 datasets × 5 budgets)
+--------------------------------------------------------------------------------
+Attack          Highest              2nd Highest          3rd Highest         
+--------------------------------------------------------------------------------
+Random           0 out of 20 tasks    1 out of 20 tasks    2 out of 20 tasks
+FGA              0 out of 20 tasks    0 out of 20 tasks    0 out of 20 tasks
+Nettack          2 out of 20 tasks   10 out of 20 tasks    7 out of 20 tasks
+SGAttack         0 out of 20 tasks    1 out of 20 tasks    4 out of 20 tasks
+GOttack         17 out of 20 tasks    1 out of 20 tasks    1 out of 20 tasks
+GAEttack         2 out of 20 tasks    8 out of 20 tasks    8 out of 20 tasks
+
+
+--------------------------------------------------------------------------------
+Model: GIN (20 tasks: 4 datasets × 5 budgets)
+--------------------------------------------------------------------------------
+Attack          Highest              2nd Highest          3rd Highest         
+--------------------------------------------------------------------------------
+Random           0 out of 20 tasks    2 out of 20 tasks    6 out of 20 tasks
+FGA              0 out of 20 tasks    1 out of 20 tasks    2 out of 20 tasks
+Nettack          2 out of 20 tasks    7 out of 20 tasks    6 out of 20 tasks
+SGAttack         1 out of 20 tasks    2 out of 20 tasks    4 out of 20 tasks
+GOttack          6 out of 20 tasks    7 out of 20 tasks    1 out of 20 tasks
+GAEttack        13 out of 20 tasks    4 out of 20 tasks    2 out of 20 tasks
+
+
+--------------------------------------------------------------------------------
+Model: GraphSage (19 tasks: 4 datasets × 5 budgets)
+--------------------------------------------------------------------------------
+Attack          Highest              2nd Highest          3rd Highest         
+--------------------------------------------------------------------------------
+Random           1 out of 19 tasks    1 out of 19 tasks    5 out of 19 tasks
+FGA              0 out of 19 tasks    0 out of 19 tasks    3 out of 19 tasks
+Nettack          1 out of 19 tasks    3 out of 19 tasks   12 out of 19 tasks
+SGAttack         0 out of 19 tasks    4 out of 19 tasks    3 out of 19 tasks
+GOttack          6 out of 19 tasks    9 out of 19 tasks    0 out of 19 tasks
+GAEttack        14 out of 19 tasks    5 out of 19 tasks    0 out of 19 tasks
+
+
+--------------------------------------------------------------------------------
+Model: RobustGCN (20 tasks: 4 datasets × 5 budgets)
+--------------------------------------------------------------------------------
+Attack          Highest              2nd Highest          3rd Highest         
+--------------------------------------------------------------------------------
+Random           0 out of 20 tasks    1 out of 20 tasks    1 out of 20 tasks
+FGA              0 out of 20 tasks    0 out of 20 tasks    2 out of 20 tasks
+Nettack          0 out of 20 tasks    4 out of 20 tasks   10 out of 20 tasks
+SGAttack        10 out of 20 tasks    6 out of 20 tasks    3 out of 20 tasks
+GOttack          7 out of 20 tasks    7 out of 20 tasks    5 out of 20 tasks
+GAEttack         7 out of 20 tasks    5 out of 20 tasks    2 out of 20 tasks
+
+
+--------------------------------------------------------------------------------
+Model: GCN-Jaccard (20 tasks: 4 datasets × 5 budgets)
+--------------------------------------------------------------------------------
+Attack          Highest              2nd Highest          3rd Highest         
+--------------------------------------------------------------------------------
+Random           0 out of 20 tasks    2 out of 20 tasks    1 out of 20 tasks
+FGA              0 out of 20 tasks    3 out of 20 tasks    2 out of 20 tasks
+Nettack          2 out of 20 tasks    8 out of 20 tasks    7 out of 20 tasks
+SGAttack         2 out of 20 tasks    6 out of 20 tasks    6 out of 20 tasks
+GOttack         13 out of 20 tasks    2 out of 20 tasks    2 out of 20 tasks
+GAEttack         5 out of 20 tasks    7 out of 20 tasks    7 out of 20 tasks
+
+
+--------------------------------------------------------------------------------
+Model: GCN-SVD (20 tasks: 4 datasets × 5 budgets)
+--------------------------------------------------------------------------------
+Attack          Highest              2nd Highest          3rd Highest         
+--------------------------------------------------------------------------------
+Random           6 out of 20 tasks    8 out of 20 tasks    0 out of 20 tasks
+FGA              0 out of 20 tasks    0 out of 20 tasks    4 out of 20 tasks
+Nettack          0 out of 20 tasks    7 out of 20 tasks    6 out of 20 tasks
+SGAttack         0 out of 20 tasks    0 out of 20 tasks    4 out of 20 tasks
+GOttack          2 out of 20 tasks    4 out of 20 tasks    6 out of 20 tasks
+GAEttack        13 out of 20 tasks    3 out of 20 tasks    4 out of 20 tasks
+
+================================================================================
+4. PER-MODEL PER-DATASET BREAKDOWN
+================================================================================
+
+
+================================================================================
+MODEL: GCN
+================================================================================
+
+--------------------------------------------------------------------------------
+GCN on Cora (5 tasks: 5 budgets)
+--------------------------------------------------------------------------------
+Attack          Highest              2nd Highest          3rd Highest         
+--------------------------------------------------------------------------------
+Random          0 out of 5 tasks    0 out of 5 tasks    0 out of 5 tasks
+FGA             0 out of 5 tasks    0 out of 5 tasks    0 out of 5 tasks
+Nettack         0 out of 5 tasks    4 out of 5 tasks    1 out of 5 tasks
+SGAttack        0 out of 5 tasks    0 out of 5 tasks    0 out of 5 tasks
+GOttack         5 out of 5 tasks    0 out of 5 tasks    0 out of 5 tasks
+GAEttack        0 out of 5 tasks    1 out of 5 tasks    4 out of 5 tasks
+
+
+--------------------------------------------------------------------------------
+GCN on Citeseer (5 tasks: 5 budgets)
+--------------------------------------------------------------------------------
+Attack          Highest              2nd Highest          3rd Highest         
+--------------------------------------------------------------------------------
+Random          0 out of 5 tasks    0 out of 5 tasks    0 out of 5 tasks
+FGA             0 out of 5 tasks    0 out of 5 tasks    0 out of 5 tasks
+Nettack         0 out of 5 tasks    3 out of 5 tasks    2 out of 5 tasks
+SGAttack        0 out of 5 tasks    0 out of 5 tasks    0 out of 5 tasks
+GOttack         5 out of 5 tasks    0 out of 5 tasks    0 out of 5 tasks
+GAEttack        0 out of 5 tasks    2 out of 5 tasks    3 out of 5 tasks
+
+
+--------------------------------------------------------------------------------
+GCN on Polblogs (5 tasks: 5 budgets)
+--------------------------------------------------------------------------------
+Attack          Highest              2nd Highest          3rd Highest         
+--------------------------------------------------------------------------------
+Random          0 out of 5 tasks    1 out of 5 tasks    2 out of 5 tasks
+FGA             0 out of 5 tasks    0 out of 5 tasks    0 out of 5 tasks
+Nettack         0 out of 5 tasks    0 out of 5 tasks    4 out of 5 tasks
+SGAttack        0 out of 5 tasks    0 out of 5 tasks    0 out of 5 tasks
+GOttack         5 out of 5 tasks    0 out of 5 tasks    0 out of 5 tasks
+GAEttack        0 out of 5 tasks    4 out of 5 tasks    0 out of 5 tasks
+
+
+--------------------------------------------------------------------------------
+GCN on BlogCatalog (5 tasks: 5 budgets)
+--------------------------------------------------------------------------------
+Attack          Highest              2nd Highest          3rd Highest         
+--------------------------------------------------------------------------------
+Random          0 out of 5 tasks    0 out of 5 tasks    0 out of 5 tasks
+FGA             0 out of 5 tasks    0 out of 5 tasks    0 out of 5 tasks
+Nettack         2 out of 5 tasks    3 out of 5 tasks    0 out of 5 tasks
+SGAttack        0 out of 5 tasks    1 out of 5 tasks    4 out of 5 tasks
+GOttack         2 out of 5 tasks    1 out of 5 tasks    1 out of 5 tasks
+GAEttack        2 out of 5 tasks    1 out of 5 tasks    1 out of 5 tasks
+
+
+================================================================================
+MODEL: GIN
+================================================================================
+
+--------------------------------------------------------------------------------
+GIN on Cora (5 tasks: 5 budgets)
+--------------------------------------------------------------------------------
+Attack          Highest              2nd Highest          3rd Highest         
+--------------------------------------------------------------------------------
+Random          0 out of 5 tasks    0 out of 5 tasks    2 out of 5 tasks
+FGA             0 out of 5 tasks    1 out of 5 tasks    0 out of 5 tasks
+Nettack         1 out of 5 tasks    3 out of 5 tasks    1 out of 5 tasks
+SGAttack        1 out of 5 tasks    0 out of 5 tasks    1 out of 5 tasks
+GOttack         0 out of 5 tasks    3 out of 5 tasks    1 out of 5 tasks
+GAEttack        4 out of 5 tasks    1 out of 5 tasks    0 out of 5 tasks
+
+
+--------------------------------------------------------------------------------
+GIN on Citeseer (5 tasks: 5 budgets)
+--------------------------------------------------------------------------------
+Attack          Highest              2nd Highest          3rd Highest         
+--------------------------------------------------------------------------------
+Random          0 out of 5 tasks    0 out of 5 tasks    0 out of 5 tasks
+FGA             0 out of 5 tasks    0 out of 5 tasks    0 out of 5 tasks
+Nettack         0 out of 5 tasks    0 out of 5 tasks    4 out of 5 tasks
+SGAttack        0 out of 5 tasks    0 out of 5 tasks    1 out of 5 tasks
+GOttack         1 out of 5 tasks    4 out of 5 tasks    0 out of 5 tasks
+GAEttack        4 out of 5 tasks    1 out of 5 tasks    0 out of 5 tasks
+
+
+--------------------------------------------------------------------------------
+GIN on Polblogs (5 tasks: 5 budgets)
+--------------------------------------------------------------------------------
+Attack          Highest              2nd Highest          3rd Highest         
+--------------------------------------------------------------------------------
+Random          0 out of 5 tasks    2 out of 5 tasks    3 out of 5 tasks
+FGA             0 out of 5 tasks    0 out of 5 tasks    1 out of 5 tasks
+Nettack         0 out of 5 tasks    2 out of 5 tasks    0 out of 5 tasks
+SGAttack        0 out of 5 tasks    0 out of 5 tasks    0 out of 5 tasks
+GOttack         5 out of 5 tasks    0 out of 5 tasks    0 out of 5 tasks
+GAEttack        1 out of 5 tasks    1 out of 5 tasks    2 out of 5 tasks
+
+
+--------------------------------------------------------------------------------
+GIN on BlogCatalog (5 tasks: 5 budgets)
+--------------------------------------------------------------------------------
+Attack          Highest              2nd Highest          3rd Highest         
+--------------------------------------------------------------------------------
+Random          0 out of 5 tasks    0 out of 5 tasks    1 out of 5 tasks
+FGA             0 out of 5 tasks    0 out of 5 tasks    1 out of 5 tasks
+Nettack         1 out of 5 tasks    2 out of 5 tasks    1 out of 5 tasks
+SGAttack        0 out of 5 tasks    2 out of 5 tasks    2 out of 5 tasks
+GOttack         0 out of 5 tasks    0 out of 5 tasks    0 out of 5 tasks
+GAEttack        4 out of 5 tasks    1 out of 5 tasks    0 out of 5 tasks
+
+
+================================================================================
+MODEL: GraphSage
+================================================================================
+
+--------------------------------------------------------------------------------
+GraphSage on Cora (5 tasks: 5 budgets)
+--------------------------------------------------------------------------------
+Attack          Highest              2nd Highest          3rd Highest         
+--------------------------------------------------------------------------------
+Random          0 out of 5 tasks    0 out of 5 tasks    0 out of 5 tasks
+FGA             0 out of 5 tasks    0 out of 5 tasks    0 out of 5 tasks
+Nettack         0 out of 5 tasks    0 out of 5 tasks    3 out of 5 tasks
+SGAttack        0 out of 5 tasks    0 out of 5 tasks    2 out of 5 tasks
+GOttack         1 out of 5 tasks    4 out of 5 tasks    0 out of 5 tasks
+GAEttack        4 out of 5 tasks    1 out of 5 tasks    0 out of 5 tasks
+
+
+--------------------------------------------------------------------------------
+GraphSage on Citeseer (5 tasks: 5 budgets)
+--------------------------------------------------------------------------------
+Attack          Highest              2nd Highest          3rd Highest         
+--------------------------------------------------------------------------------
+Random          0 out of 5 tasks    0 out of 5 tasks    2 out of 5 tasks
+FGA             0 out of 5 tasks    0 out of 5 tasks    0 out of 5 tasks
+Nettack         0 out of 5 tasks    1 out of 5 tasks    3 out of 5 tasks
+SGAttack        0 out of 5 tasks    0 out of 5 tasks    0 out of 5 tasks
+GOttack         4 out of 5 tasks    1 out of 5 tasks    0 out of 5 tasks
+GAEttack        2 out of 5 tasks    3 out of 5 tasks    0 out of 5 tasks
+
+
+--------------------------------------------------------------------------------
+GraphSage on Polblogs (5 tasks: 5 budgets)
+--------------------------------------------------------------------------------
+Attack          Highest              2nd Highest          3rd Highest         
+--------------------------------------------------------------------------------
+Random          0 out of 5 tasks    1 out of 5 tasks    2 out of 5 tasks
+FGA             0 out of 5 tasks    0 out of 5 tasks    0 out of 5 tasks
+Nettack         0 out of 5 tasks    0 out of 5 tasks    4 out of 5 tasks
+SGAttack        0 out of 5 tasks    0 out of 5 tasks    0 out of 5 tasks
+GOttack         1 out of 5 tasks    4 out of 5 tasks    0 out of 5 tasks
+GAEttack        4 out of 5 tasks    1 out of 5 tasks    0 out of 5 tasks
+
+
+--------------------------------------------------------------------------------
+GraphSage on BlogCatalog (5 tasks: 5 budgets)
+--------------------------------------------------------------------------------
+Attack          Highest              2nd Highest          3rd Highest         
+--------------------------------------------------------------------------------
+Random          1 out of 5 tasks    0 out of 5 tasks    1 out of 5 tasks
+FGA             0 out of 5 tasks    0 out of 5 tasks    3 out of 5 tasks
+Nettack         1 out of 5 tasks    2 out of 5 tasks    2 out of 5 tasks
+SGAttack        0 out of 5 tasks    4 out of 5 tasks    1 out of 5 tasks
+GAEttack        4 out of 5 tasks    0 out of 5 tasks    0 out of 5 tasks
+
+
+================================================================================
+MODEL: RobustGCN
+================================================================================
+
+--------------------------------------------------------------------------------
+RobustGCN on Cora (5 tasks: 5 budgets)
+--------------------------------------------------------------------------------
+Attack          Highest              2nd Highest          3rd Highest         
+--------------------------------------------------------------------------------
+Random          0 out of 5 tasks    0 out of 5 tasks    0 out of 5 tasks
+FGA             0 out of 5 tasks    0 out of 5 tasks    0 out of 5 tasks
+Nettack         0 out of 5 tasks    1 out of 5 tasks    3 out of 5 tasks
+SGAttack        2 out of 5 tasks    3 out of 5 tasks    0 out of 5 tasks
+GOttack         3 out of 5 tasks    1 out of 5 tasks    1 out of 5 tasks
+GAEttack        1 out of 5 tasks    0 out of 5 tasks    1 out of 5 tasks
+
+
+--------------------------------------------------------------------------------
+RobustGCN on Citeseer (5 tasks: 5 budgets)
+--------------------------------------------------------------------------------
+Attack          Highest              2nd Highest          3rd Highest         
+--------------------------------------------------------------------------------
+Random          0 out of 5 tasks    1 out of 5 tasks    0 out of 5 tasks
+FGA             0 out of 5 tasks    0 out of 5 tasks    1 out of 5 tasks
+Nettack         0 out of 5 tasks    1 out of 5 tasks    4 out of 5 tasks
+SGAttack        3 out of 5 tasks    2 out of 5 tasks    0 out of 5 tasks
+GOttack         3 out of 5 tasks    2 out of 5 tasks    0 out of 5 tasks
+GAEttack        2 out of 5 tasks    1 out of 5 tasks    0 out of 5 tasks
+
+
+--------------------------------------------------------------------------------
+RobustGCN on Polblogs (5 tasks: 5 budgets)
+--------------------------------------------------------------------------------
+Attack          Highest              2nd Highest          3rd Highest         
+--------------------------------------------------------------------------------
+Random          0 out of 5 tasks    0 out of 5 tasks    1 out of 5 tasks
+FGA             0 out of 5 tasks    0 out of 5 tasks    0 out of 5 tasks
+Nettack         0 out of 5 tasks    0 out of 5 tasks    1 out of 5 tasks
+SGAttack        5 out of 5 tasks    0 out of 5 tasks    0 out of 5 tasks
+GOttack         0 out of 5 tasks    1 out of 5 tasks    4 out of 5 tasks
+GAEttack        0 out of 5 tasks    4 out of 5 tasks    1 out of 5 tasks
+
+
+--------------------------------------------------------------------------------
+RobustGCN on BlogCatalog (5 tasks: 5 budgets)
+--------------------------------------------------------------------------------
+Attack          Highest              2nd Highest          3rd Highest         
+--------------------------------------------------------------------------------
+Random          0 out of 5 tasks    0 out of 5 tasks    0 out of 5 tasks
+FGA             0 out of 5 tasks    0 out of 5 tasks    1 out of 5 tasks
+Nettack         0 out of 5 tasks    2 out of 5 tasks    2 out of 5 tasks
+SGAttack        0 out of 5 tasks    1 out of 5 tasks    3 out of 5 tasks
+GOttack         1 out of 5 tasks    3 out of 5 tasks    0 out of 5 tasks
+GAEttack        4 out of 5 tasks    0 out of 5 tasks    0 out of 5 tasks
+
+
+================================================================================
+MODEL: GCN-Jaccard
+================================================================================
+
+--------------------------------------------------------------------------------
+GCN-Jaccard on Cora (5 tasks: 5 budgets)
+--------------------------------------------------------------------------------
+Attack          Highest              2nd Highest          3rd Highest         
+--------------------------------------------------------------------------------
+Random          0 out of 5 tasks    0 out of 5 tasks    0 out of 5 tasks
+FGA             0 out of 5 tasks    1 out of 5 tasks    0 out of 5 tasks
+Nettack         0 out of 5 tasks    2 out of 5 tasks    3 out of 5 tasks
+SGAttack        0 out of 5 tasks    1 out of 5 tasks    0 out of 5 tasks
+GOttack         4 out of 5 tasks    0 out of 5 tasks    1 out of 5 tasks
+GAEttack        1 out of 5 tasks    3 out of 5 tasks    1 out of 5 tasks
+
+
+--------------------------------------------------------------------------------
+GCN-Jaccard on Citeseer (5 tasks: 5 budgets)
+--------------------------------------------------------------------------------
+Attack          Highest              2nd Highest          3rd Highest         
+--------------------------------------------------------------------------------
+Random          0 out of 5 tasks    0 out of 5 tasks    1 out of 5 tasks
+FGA             0 out of 5 tasks    0 out of 5 tasks    0 out of 5 tasks
+Nettack         0 out of 5 tasks    1 out of 5 tasks    2 out of 5 tasks
+SGAttack        2 out of 5 tasks    3 out of 5 tasks    0 out of 5 tasks
+GOttack         4 out of 5 tasks    1 out of 5 tasks    0 out of 5 tasks
+GAEttack        0 out of 5 tasks    1 out of 5 tasks    3 out of 5 tasks
+
+
+--------------------------------------------------------------------------------
+GCN-Jaccard on Polblogs (5 tasks: 5 budgets)
+--------------------------------------------------------------------------------
+Attack          Highest              2nd Highest          3rd Highest         
+--------------------------------------------------------------------------------
+Random          0 out of 5 tasks    2 out of 5 tasks    0 out of 5 tasks
+FGA             0 out of 5 tasks    2 out of 5 tasks    2 out of 5 tasks
+Nettack         0 out of 5 tasks    2 out of 5 tasks    2 out of 5 tasks
+SGAttack        0 out of 5 tasks    1 out of 5 tasks    3 out of 5 tasks
+GOttack         1 out of 5 tasks    1 out of 5 tasks    0 out of 5 tasks
+GAEttack        4 out of 5 tasks    1 out of 5 tasks    0 out of 5 tasks
+
+
+--------------------------------------------------------------------------------
+GCN-Jaccard on BlogCatalog (5 tasks: 5 budgets)
+--------------------------------------------------------------------------------
+Attack          Highest              2nd Highest          3rd Highest         
+--------------------------------------------------------------------------------
+Random          0 out of 5 tasks    0 out of 5 tasks    0 out of 5 tasks
+FGA             0 out of 5 tasks    0 out of 5 tasks    0 out of 5 tasks
+Nettack         2 out of 5 tasks    3 out of 5 tasks    0 out of 5 tasks
+SGAttack        0 out of 5 tasks    1 out of 5 tasks    3 out of 5 tasks
+GOttack         4 out of 5 tasks    0 out of 5 tasks    1 out of 5 tasks
+GAEttack        0 out of 5 tasks    2 out of 5 tasks    3 out of 5 tasks
+
+
+================================================================================
+MODEL: GCN-SVD
+================================================================================
+
+--------------------------------------------------------------------------------
+GCN-SVD on Cora (5 tasks: 5 budgets)
+--------------------------------------------------------------------------------
+Attack          Highest              2nd Highest          3rd Highest         
+--------------------------------------------------------------------------------
+Random          0 out of 5 tasks    4 out of 5 tasks    0 out of 5 tasks
+FGA             0 out of 5 tasks    0 out of 5 tasks    1 out of 5 tasks
+Nettack         0 out of 5 tasks    1 out of 5 tasks    3 out of 5 tasks
+SGAttack        0 out of 5 tasks    0 out of 5 tasks    0 out of 5 tasks
+GOttack         1 out of 5 tasks    0 out of 5 tasks    1 out of 5 tasks
+GAEttack        4 out of 5 tasks    0 out of 5 tasks    1 out of 5 tasks
+
+
+--------------------------------------------------------------------------------
+GCN-SVD on Citeseer (5 tasks: 5 budgets)
+--------------------------------------------------------------------------------
+Attack          Highest              2nd Highest          3rd Highest         
+--------------------------------------------------------------------------------
+Random          1 out of 5 tasks    4 out of 5 tasks    0 out of 5 tasks
+FGA             0 out of 5 tasks    0 out of 5 tasks    0 out of 5 tasks
+Nettack         0 out of 5 tasks    0 out of 5 tasks    0 out of 5 tasks
+SGAttack        0 out of 5 tasks    0 out of 5 tasks    0 out of 5 tasks
+GOttack         0 out of 5 tasks    1 out of 5 tasks    4 out of 5 tasks
+GAEttack        4 out of 5 tasks    0 out of 5 tasks    1 out of 5 tasks
+
+
+--------------------------------------------------------------------------------
+GCN-SVD on Polblogs (5 tasks: 5 budgets)
+--------------------------------------------------------------------------------
+Attack          Highest              2nd Highest          3rd Highest         
+--------------------------------------------------------------------------------
+Random          5 out of 5 tasks    0 out of 5 tasks    0 out of 5 tasks
+FGA             0 out of 5 tasks    0 out of 5 tasks    2 out of 5 tasks
+Nettack         0 out of 5 tasks    4 out of 5 tasks    1 out of 5 tasks
+SGAttack        0 out of 5 tasks    0 out of 5 tasks    0 out of 5 tasks
+GOttack         0 out of 5 tasks    0 out of 5 tasks    0 out of 5 tasks
+GAEttack        0 out of 5 tasks    3 out of 5 tasks    2 out of 5 tasks
+
+
+--------------------------------------------------------------------------------
+GCN-SVD on BlogCatalog (5 tasks: 5 budgets)
+--------------------------------------------------------------------------------
+Attack          Highest              2nd Highest          3rd Highest         
+--------------------------------------------------------------------------------
+Random          0 out of 5 tasks    0 out of 5 tasks    0 out of 5 tasks
+FGA             0 out of 5 tasks    0 out of 5 tasks    1 out of 5 tasks
+Nettack         0 out of 5 tasks    2 out of 5 tasks    2 out of 5 tasks
+SGAttack        0 out of 5 tasks    0 out of 5 tasks    4 out of 5 tasks
+GOttack         1 out of 5 tasks    3 out of 5 tasks    1 out of 5 tasks
+GAEttack        5 out of 5 tasks    0 out of 5 tasks    0 out of 5 tasks

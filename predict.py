@@ -238,7 +238,7 @@ def test_acc_GIN(adj, features, data, target_node):
             
             # Move model and data to CPU
             gin = gin.cpu()
-            pyg_data[0] = pyg_data[0].cpu()
+            pyg_data[0] = pyg_data.cpu()
             gin.device = torch.device('cpu')
             
             # Clear CUDA cache

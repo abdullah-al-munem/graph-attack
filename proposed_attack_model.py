@@ -1,3 +1,5 @@
+import os
+os.environ["CUDA_VISIBLE_DEVICES"] = "0" 
 import time
 import json
 
@@ -419,31 +421,31 @@ class ProposedAttack:
         # filtered_edges = potential_edges[singleton_filter]
         
         # Update the values for the power law likelihood ratio test.
-        ll_cutoff = 0.004
-        d_min = 2
-        degree_sequence_start = ori_adj.sum(0).A1
-        current_degree_sequence = modified_adj.sum(0).A1
-        current_S_d = np.sum(np.log(current_degree_sequence[current_degree_sequence >= d_min]))
-        current_n = np.sum(current_degree_sequence >= d_min)
-        n_start = np.sum(degree_sequence_start >= d_min)
-        S_d_start = np.sum(np.log(degree_sequence_start[degree_sequence_start >= d_min]))
-        alpha_start = compute_alpha(n_start, S_d_start, d_min)
-        log_likelihood_orig = compute_log_likelihood(n_start, alpha_start, S_d_start, d_min)
+        # ll_cutoff = 0.004
+        # d_min = 2
+        # degree_sequence_start = ori_adj.sum(0).A1
+        # current_degree_sequence = modified_adj.sum(0).A1
+        # current_S_d = np.sum(np.log(current_degree_sequence[current_degree_sequence >= d_min]))
+        # current_n = np.sum(current_degree_sequence >= d_min)
+        # n_start = np.sum(degree_sequence_start >= d_min)
+        # S_d_start = np.sum(np.log(degree_sequence_start[degree_sequence_start >= d_min]))
+        # alpha_start = compute_alpha(n_start, S_d_start, d_min)
+        # log_likelihood_orig = compute_log_likelihood(n_start, alpha_start, S_d_start, d_min)
 
-        deltas = 2 * (1 - modified_adj[tuple(filtered_edges.T)].toarray()[0] )- 1
-        d_edges_old = current_degree_sequence[filtered_edges]
-        d_edges_new = current_degree_sequence[filtered_edges] + deltas[:, None]
-        new_S_d, new_n = update_Sx(current_S_d, current_n, d_edges_old, d_edges_new, d_min)
-        new_alphas = compute_alpha(new_n, new_S_d, d_min)
-        new_ll = compute_log_likelihood(new_n, new_alphas, new_S_d, d_min)
-        alphas_combined = compute_alpha(new_n + n_start, new_S_d + S_d_start, d_min)
-        new_ll_combined = compute_log_likelihood(new_n + n_start, alphas_combined, new_S_d + S_d_start, d_min)
-        new_ratios = -2 * new_ll_combined + 2 * (new_ll + log_likelihood_orig)
+        # deltas = 2 * (1 - modified_adj[tuple(filtered_edges.T)].toarray()[0] )- 1
+        # d_edges_old = current_degree_sequence[filtered_edges]
+        # d_edges_new = current_degree_sequence[filtered_edges] + deltas[:, None]
+        # new_S_d, new_n = update_Sx(current_S_d, current_n, d_edges_old, d_edges_new, d_min)
+        # new_alphas = compute_alpha(new_n, new_S_d, d_min)
+        # new_ll = compute_log_likelihood(new_n, new_alphas, new_S_d, d_min)
+        # alphas_combined = compute_alpha(new_n + n_start, new_S_d + S_d_start, d_min)
+        # new_ll_combined = compute_log_likelihood(new_n + n_start, alphas_combined, new_S_d + S_d_start, d_min)
+        # new_ratios = -2 * new_ll_combined + 2 * (new_ll + log_likelihood_orig)
 
-        # Do not consider edges that, if added/removed, would lead to a violation of the
-        # likelihood ration Chi_square cutoff value.
-        powerlaw_filter = filter_chisquare(new_ratios, ll_cutoff)
-        filtered_edges = filtered_edges[powerlaw_filter]
+        # # Do not consider edges that, if added/removed, would lead to a violation of the
+        # # likelihood ration Chi_square cutoff value.
+        # powerlaw_filter = filter_chisquare(new_ratios, ll_cutoff)
+        # filtered_edges = filtered_edges[powerlaw_filter]
 
 
         # Compute new entries in A_hat_square_uv
@@ -907,25 +909,25 @@ def start_attack_proposed_model(surrogate_model, dataset, defense_model, budget_
     with open(f"{root_dir}/add_remove_stat_proposed_model_{dataset}_{defense_model}_{times}.json", 'w', encoding='utf-8') as json_file:
         json.dump(add_remove_stat, json_file, indent=4, ensure_ascii=False)
 
+    print("done...............")
+    # # Create two line charts for col1 and col2
+    # plt.figure(figsize=(8, 6))
 
-    # Create two line charts for col1 and col2
-    plt.figure(figsize=(8, 6))
+    # # Line chart for col1
+    # plt.plot(df['budget_number'], df['miss-classification_modified'], label='Modified Adj', marker='o', markersize=5, linestyle='-')
 
-    # Line chart for col1
-    plt.plot(df['budget_number'], df['miss-classification_modified'], label='Modified Adj', marker='o', markersize=5, linestyle='-')
+    # # plt.ylim(bottom=0.10, top=0.50)
 
-    # plt.ylim(bottom=0.10, top=0.50)
+    # # Add labels and a legend
+    # plt.xlabel('target_number') 
+    # plt.ylabel('miss-classification')
+    # plt.title(f'proposed_model_{dataset}_{defense_model}_{times}')
+    # plt.legend()
 
-    # Add labels and a legend
-    plt.xlabel('target_number') 
-    plt.ylabel('miss-classification')
-    plt.title(f'proposed_model_{dataset}_{defense_model}_{times}')
-    plt.legend()
-
-    # Show the plot
-    plt.grid(True)
-    plt.savefig(f'{root_dir}/proposed_model_{dataset}_{defense_model}_{times}.png')
-    # plt.show()
+    # # Show the plot
+    # plt.grid(True)
+    # plt.savefig(f'{root_dir}/proposed_model_{dataset}_{defense_model}_{times}.png')
+    # # plt.show()
 
 
 if __name__ == "__main__": 
@@ -937,8 +939,8 @@ if __name__ == "__main__":
     '''
 
     surrogate_model = 'gcn'
-    dataset = 'cora'
-    defense_model = 'gcn'
+    dataset = 'blogcatalog'
+    defense_model = 'gin'
 
     data = get_dataset_from_deeprobust(dataset=dataset)
     # print("Dataset loaded...")
@@ -946,6 +948,7 @@ if __name__ == "__main__":
 
     # node_list = [929, 1342, 1554, 1255, 2406, 1163, 1340, 2077, 1347, 1820, 429, 1267, 1068, 1223, 1330, 1959, 2469, 1343, 1070, 2355, 1829, 482, 2035, 615, 1441, 23, 582, 875, 1309, 2256, 2396, 2228, 336, 463, 2142, 603, 2423, 2109, 846, 117]
     node_list = get_target_node_list(data)
+    # node_list = [87, 1067, 1322, 1037, 1486, 1168, 833, 1681, 1997, 1316, 3334, 4595, 3989, 5099, 5069, 4777, 3929, 3261, 3573, 2857, 2649, 645, 2608, 1257, 1151, 4286, 1785, 3551, 942, 2985, 2011, 1819, 4803, 2612, 438, 2862, 742, 681, 299, 1743]
     # node_list = [1079,]
     # print("Targegt nodes are being selected...")
 
