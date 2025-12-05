@@ -1,6 +1,6 @@
 import os
 import glob
-# os.environ["CUDA_VISIBLE_DEVICES"] = "1" 
+os.environ["CUDA_VISIBLE_DEVICES"] = "1" 
 import logging
 import warnings
 import pandas as pd

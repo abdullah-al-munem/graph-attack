@@ -1,13 +1,16 @@
 import os
-# os.environ["CUDA_VISIBLE_DEVICES"] = "1" 
+# os.environ["CUDA_VISIBLE_DEVICES"] = "0" 
 import time
 import json
-import collections
 
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import os
 import tqdm
+import json
+import collections
+
 import networkx as nx
 
 import logging
@@ -15,10 +18,14 @@ import warnings
 
 import torch
 import torch.nn as nn
+import torch_geometric
 from torch.nn import init
 import torch_geometric.transforms as T
+# from pygod.utils import load_data
+from torch_geometric.data import Data
+from torch_geometric.transforms import NormalizeFeatures
 
-from deeprobust.graph.data import Dpr2Pyg
+from deeprobust.graph.data import Dataset, Dpr2Pyg, Pyg2Dpr
 from deeprobust.graph.defense import GCN
 from deeprobust.graph.defense import GAT
 from GIN import GIN
@@ -29,13 +36,12 @@ from scipy.sparse import lil_matrix
 
 from autoencoders import GAEModel, VGAEModel
 
-from predict import test_acc_GCN, test_acc_GIN, test_acc_GSAGE, test_acc_RGCN, test_acc_MDGCN, test_acc_JacGCN, test_acc_SVDGCN
+from predict import test_GCN, test_GAT, test_GIN, test_GraphSAGE, test_RGCN, test_acc_GCN, test_acc_GIN, test_acc_GSAGE, test_acc_RGCN, test_acc_MDGCN, test_acc_JacGCN, test_acc_SVDGCN
 
-from utils import get_dataset_from_deeprobust, get_target_node_list
+from utils import get_dataset_from_deeprobust, destructuring_dataset, get_predict_function, get_target_node_list
 
 warnings.simplefilter('ignore')
 
-logging.getLogger('numba').setLevel(logging.WARNING)
 
 log_file_name = "./attack.log"
 
@@ -45,19 +51,31 @@ if os.path.exists(log_file_name):
         os.remove(f"{log_file_name}.bak")
         
     os.rename(log_file_name, f"{log_file_name}.bak")
+    # Remove the original file
+    # os.remove(f"{log_file_name}")
+
+
 
 # Configure logging to both console and file
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     handlers=[
-                        logging.StreamHandler(),
-                        logging.FileHandler(log_file_name)
+                        logging.StreamHandler(),  # Log to console
+                        logging.FileHandler(log_file_name)  # Log to a file
                     ])
 
+# Create a logger
 logger = logging.getLogger(__name__)
 logger.info('The attack has been started...')
 
+# Example usage
+# logger.debug('This is a debug message')
+# logger.info('This is an info message')
+# logger.warning('This is a warning message')
+# logger.error('This is an error message')
+# logger.critical('This is a critical message')
 def get_device():
+
     torch.manual_seed(0)
 
     if torch.cuda.is_available():
@@ -81,13 +99,26 @@ def convert_time(seconds):
     seconds %= 60
     return minutes, seconds
 
+# import scipy.sparse as sp
 def is_sparse_tensor(tensor):
-    """Check if a tensor is sparse tensor."""
+    """Check if a tensor is sparse tensor.
+
+    Parameters
+    ----------
+    tensor : torch.Tensor
+        given tensor
+
+    Returns
+    -------
+    bool
+        whether a tensor is sparse tensor
+    """
+    # if hasattr(tensor, 'nnz'):
     if tensor.layout == torch.sparse_coo:
         return True
     else:
         return False
-
+    
 def to_scipy(tensor):
     """Convert a dense/sparse tensor to scipy matrix"""
     if is_sparse_tensor(tensor):
@@ -98,99 +129,70 @@ def to_scipy(tensor):
         indices = tensor.nonzero().t()
         values = tensor[indices[0], indices[1]]
         return sp.csr_matrix((values.cpu().numpy(), indices.cpu().numpy()), shape=tensor.shape)
-
-def scipy_to_torch_sparse(sp_matrix, device):
-    """Convert scipy sparse matrix to PyTorch sparse tensor on specified device"""
-    sp_matrix = sp.coo_matrix(sp_matrix)
-    indices = torch.from_numpy(np.vstack((sp_matrix.row, sp_matrix.col))).long()
-    values = torch.from_numpy(sp_matrix.data).float()
-    shape = torch.Size(sp_matrix.shape)
-    return torch.sparse_coo_tensor(indices, values, shape, device=device)
-
-def torch_sparse_to_scipy(torch_sparse):
-    """Convert PyTorch sparse tensor to scipy sparse matrix"""
-    torch_sparse = torch_sparse.coalesce()
-    indices = torch_sparse.indices().cpu().numpy()
-    values = torch_sparse.values().cpu().numpy()
-    shape = torch_sparse.shape
-    return sp.coo_matrix((values, (indices[0], indices[1])), shape=shape).tocsr()
-
-def normalize_adj_torch(adj_sparse, device):
-    """Normalize sparse adjacency matrix using PyTorch on GPU
+    
+# add_remove_stat = collections.defaultdict(lambda : 0)
+def normalize_adj(mx):
+    """Normalize sparse adjacency matrix,
     A' = (D + I)^-1/2 * ( A + I ) * (D + I)^-1/2
-    """
-    adj_sparse = adj_sparse.coalesce()
-    n = adj_sparse.shape[0]
-    
-    # Add self-loops
-    indices = adj_sparse.indices()
-    values = adj_sparse.values()
-    
-    # Check if self-loops exist
-    self_loop_mask = indices[0] == indices[1]
-    if not self_loop_mask.any():
-        # Add identity
-        eye_indices = torch.arange(n, device=device).unsqueeze(0).repeat(2, 1)
-        eye_values = torch.ones(n, device=device)
-        indices = torch.cat([indices, eye_indices], dim=1)
-        values = torch.cat([values, eye_values])
-    
-    adj_with_self = torch.sparse_coo_tensor(indices, values, (n, n), device=device).coalesce()
-    
-    # Compute degree
-    deg = torch.sparse.sum(adj_with_self, dim=1).to_dense()
-    deg_inv_sqrt = deg.pow(-0.5)
-    deg_inv_sqrt[torch.isinf(deg_inv_sqrt)] = 0.
-    
-    # Create diagonal matrix
-    deg_inv_sqrt_mat = torch.sparse_coo_tensor(
-        torch.arange(n, device=device).unsqueeze(0).repeat(2, 1),
-        deg_inv_sqrt,
-        (n, n),
-        device=device
-    )
-    
-    # Normalize: D^-0.5 * A * D^-0.5
-    normalized = torch.sparse.mm(deg_inv_sqrt_mat, adj_with_self)
-    normalized = torch.sparse.mm(normalized, deg_inv_sqrt_mat)
-    
-    return normalized
+    Row-normalize sparse matrix
 
-def compute_new_a_hat_uv_torch(potential_edges, target_node, modified_adj_torch, adj_norm_torch, nnodes, device):
-    """
-    GPU-accelerated version of compute_new_a_hat_uv
-    """
-    # Get edges as dense for computation
-    modified_adj_dense = modified_adj_torch.to_dense()
-    edges_indices = modified_adj_torch.coalesce().indices()
-    edges = edges_indices.t().cpu().numpy()
-    edges_set = {tuple(x) for x in edges}
-    
-    # Compute A_hat^2
-    A_hat_sq = torch.sparse.mm(adj_norm_torch, adj_norm_torch)
-    values_before = A_hat_sq.to_dense()[target_node].cpu().numpy()
-    
-    # Get unique nodes
-    node_ixs = np.unique(edges[:, 0], return_index=True)[1]
-    
-    # Get two-hop indices
-    A_hat_sq_dense = A_hat_sq.to_dense()
-    twohop_ixs = A_hat_sq_dense.nonzero().cpu().numpy()
-    
-    # Compute degrees
-    degrees = modified_adj_dense.sum(0).cpu().numpy() + 1
-    
-    # Call the core computation (keep original logic)
-    ixs, vals = compute_new_a_hat_uv_2(
-        edges, node_ixs, edges_set, twohop_ixs, values_before, degrees,
-        potential_edges.astype(np.int32), target_node
-    )
-    
-    ixs_arr = np.array(ixs)
-    a_hat_uv = sp.coo_matrix((vals, (ixs_arr[:, 0], ixs_arr[:, 1])), shape=[len(potential_edges), nnodes])
-    
-    return a_hat_uv
+    Parameters
+    ----------
+    mx : scipy.sparse.csr_matrix
+        matrix to be normalized
 
+    Returns
+    -------
+    scipy.sprase.lil_matrix
+        normalized matrix
+    """
+
+    # TODO: maybe using coo format would be better?
+    if type(mx) is not sp.lil.lil_matrix:
+        mx = mx.tolil()
+    if mx[0, 0] == 0 :
+        mx = mx + sp.eye(mx.shape[0])
+    rowsum = np.array(mx.sum(1))
+    r_inv = np.power(rowsum, -1/2).flatten()
+    r_inv[np.isinf(r_inv)] = 0.
+    r_mat_inv = sp.diags(r_inv)
+    mx = r_mat_inv.dot(mx)
+    mx = mx.dot(r_mat_inv)
+    return mx
+
+def compute_new_a_hat_uv(potential_edges, target_node, modified_adj, adj_norm, nnodes):
+        """
+        Compute the updated A_hat_square_uv entries that would result from inserting/deleting the input edges,
+        for every edge.
+
+        Parameters
+        ----------
+        potential_edges: np.array, shape [P,2], dtype int
+            The edges to check.
+
+        Returns
+        -------
+        sp.sparse_matrix: updated A_hat_square_u entries, a sparse PxN matrix, where P is len(possible_edges).
+        """
+
+        edges = np.array(modified_adj.nonzero()).T
+        edges_set = {tuple(x) for x in edges}
+        A_hat_sq = adj_norm @ adj_norm
+        values_before = A_hat_sq[target_node].toarray()[0]
+        node_ixs = np.unique(edges[:, 0], return_index=True)[1]
+        twohop_ixs = np.array(A_hat_sq.nonzero()).T
+        # print(type(modified_adj))
+        # exit()
+        degrees = modified_adj.sum(0).A1 + 1
+
+        ixs, vals = compute_new_a_hat_uv_2(edges, node_ixs, edges_set, twohop_ixs, values_before, degrees,
+                                         potential_edges.astype(np.int32), target_node)
+        ixs_arr = np.array(ixs)
+        a_hat_uv = sp.coo_matrix((vals, (ixs_arr[:, 0], ixs_arr[:, 1])), shape=[len(potential_edges), nnodes])
+
+        return a_hat_uv
+
+# @jit(nopython=True)
 def connected_after(u, v, connected_before, delta):
     if u == v:
         if delta == -1:
@@ -200,10 +202,13 @@ def connected_after(u, v, connected_before, delta):
     else:
         return connected_before
 
+
+# @jit(nopython=True)
 def compute_new_a_hat_uv_2(edge_ixs, node_nb_ixs, edges_set, twohop_ixs, values_before, degs, potential_edges, u):
     """
-    Compute the new values [A_hat_square]_u for every potential edge
-    KEPT EXACTLY AS ORIGINAL - Core algorithm logic preserved
+    Compute the new values [A_hat_square]_u for every potential edge, where u is the target node. C.f. Theorem 5.1
+    equation 17.
+
     """
     N = degs.shape[0]
 
@@ -257,7 +262,8 @@ def compute_new_a_hat_uv_2(edge_ixs, node_nb_ixs, edges_set, twohop_ixs, values_
 
             mult_term = 1 / np.sqrt(degs_new[u] * degs_new[v])
 
-            sum_term1 = np.sqrt(degs[u] * degs[v]) * values_before[v] - a_uv_before_sl / degs[u] - a_uv_before / degs[v]
+            sum_term1 = np.sqrt(degs[u] * degs[v]) * values_before[v] - a_uv_before_sl / degs[u] - a_uv_before / \
+                        degs[v]
             sum_term2 = a_uv_after / degs_new[v] + a_uv_after_sl / degs_new[u]
             sum_term3 = -((a_um and a_vm_before) / degs[edge[0]]) + (a_um_after and a_vm_after) / degs_new[edge[0]]
             sum_term4 = -((a_un and a_vn_before) / degs[edge[1]]) + (a_un_after and a_vn_after) / degs_new[edge[1]]
@@ -271,8 +277,21 @@ def compute_new_a_hat_uv_2(edge_ixs, node_nb_ixs, edges_set, twohop_ixs, values_
 def struct_score(a_hat_uv, XW, label_u):
     """
     Compute structure scores, cf. Eq. 15 in the paper
-    KEPT EXACTLY AS ORIGINAL
+
+    Parameters
+    ----------
+    a_hat_uv: sp.sparse_matrix, shape [P,2]
+        Entries of matrix A_hat^2_u for each potential edge (see paper for explanation)
+
+    XW: sp.sparse_matrix, shape [N, K], dtype float
+        The class logits for each node.
+
+    Returns
+    -------
+    np.array [P,]
+        The struct score for every row in a_hat_uv
     """
+
     logits = a_hat_uv.dot(XW)
     label_onehot = np.eye(XW.shape[1])[label_u]
     best_wrong_class_logits = (logits - 1000 * label_onehot).max(1)
@@ -281,15 +300,34 @@ def struct_score(a_hat_uv, XW, label_u):
 
     return struct_scores
 
+# def get_scores_and_egdes(filtered_edges, modified_features, target_node, W, label_u, modified_adj, adj_norm, nnodes):
+
+#     # potential_edges = potential_edges.astype("int32")
+#     # singleton_filter = filter_singletons(potential_edges, modified_adj)
+#     # filtered_edges = potential_edges[singleton_filter]
+    
+
+#     # Compute new entries in A_hat_square_uv
+#     a_hat_uv_new = compute_new_a_hat_uv(filtered_edges, target_node, modified_adj, adj_norm, nnodes)
+#     # Compute the struct scores for each potential edge
+#     struct_scores = struct_score(a_hat_uv_new, modified_features @ W, label_u)
+#     best_edge_ix = struct_scores.argmin()
+#     best_edge_score = struct_scores.min()
+#     best_edge = filtered_edges[best_edge_ix]
+
+#     return [best_edge_score, best_edge]
+
 def filter_singletons(edges, adj):
     """
     Filter edges that, if removed, would turn one or more nodes into singleton nodes.
-    KEPT EXACTLY AS ORIGINAL
     """
+
     if type(adj) is torch.Tensor:
         adj = to_scipy(adj).tolil()
     else:
         adj = adj.tolil()
+
+    # print(len(edges))
 
     degs = np.squeeze(np.array(np.sum(adj,0)))
     existing_edges = np.squeeze(np.array(adj.tocsr()[tuple(edges.T)]))
@@ -302,11 +340,13 @@ def filter_singletons(edges, adj):
     zeros_sum = zeros.sum(1)
     return zeros_sum == 0
 
+
 def update_Sx(S_old, n_old, d_old, d_new, d_min):
     """
-    Update on the sum of log degrees S_d and n based on degree distribution
-    KEPT EXACTLY AS ORIGINAL
+    Update on the sum of log degrees S_d and n based on degree distribution resulting from inserting or deleting
+    a single edge.
     """
+
     old_in_range = d_old >= d_min
     new_in_range = d_new >= d_min
 
@@ -319,11 +359,19 @@ def update_Sx(S_old, n_old, d_old, d_new, d_min):
     return new_S_d, new_n
 
 def compute_alpha(n, S_d, d_min):
-    """Approximate the alpha of a power law distribution."""
+    """
+    Approximate the alpha of a power law distribution.
+
+    """
+
     return n / (S_d - n * np.log(d_min - 0.5)) + 1
 
 def compute_log_likelihood(n, alpha, S_d, d_min):
-    """Compute log likelihood of the powerlaw fit."""
+    """
+    Compute log likelihood of the powerlaw fit.
+
+    """
+
     return n * np.log(alpha) + n * alpha * np.log(d_min) - (alpha + 1) * S_d
 
 def filter_chisquare(ll_ratios, cutoff):
@@ -341,10 +389,11 @@ predict_classes = {
 
 class ProposedAttack:
     def __init__(self, surrogate_model, dataset, defense_model, important_edge_list=None, attack_structure=True, attack_features=False, device=device):
+        # data = Dataset(root=r'./', name=dataset) # load clean graph
         data = get_dataset_from_deeprobust(dataset=dataset)
         self.dataset = dataset
         self.data2 = data
-        self.pyg_data = Dpr2Pyg(data)
+        self.pyg_data = Dpr2Pyg(data) # convert dpr to pyg
         self.data = self.pyg_data[0]
         self.adj = self.pyg_data[0].edge_index.t()
         self.features = self.pyg_data[0].x
@@ -352,23 +401,25 @@ class ProposedAttack:
         self.surrogate = surrogate_model.lower()
         self.device = device
         self.defense_model = defense_model.lower()
+        # self.predict = self.get_predict_function()
         self.surrogate_model, self.surrogate_model_output = self.get_surrogate_model_output()
+        # print(len(self.surrogate_model_output))
+        # print(len(self.labels), type(self.labels))
         self.important_edge_list = important_edge_list
         self.W = self.get_linearized_weight()
+        # if important_edge_list != None:
+        #     exit()
     
     def get_predict_function(self):
+        
         return predict_classes[self.defense_model]
     
-    def get_scores_and_egdes(self, filtered_edges, modified_features, target_node, W, label_u, modified_adj_torch, ori_adj_scipy, adj_norm_torch, nnodes):
+    def get_scores_and_egdes(self, filtered_edges, modified_features, target_node, W, label_u, modified_adj, ori_adj, adj_norm, nnodes):
         # Update the values for the power law likelihood ratio test.
         ll_cutoff = 0.004
         d_min = 2
-        
-        # Convert to scipy for degree computation
-        modified_adj_scipy = torch_sparse_to_scipy(modified_adj_torch)
-        
-        degree_sequence_start = ori_adj_scipy.sum(0).A1
-        current_degree_sequence = modified_adj_scipy.sum(0).A1
+        degree_sequence_start = ori_adj.sum(0).A1
+        current_degree_sequence = modified_adj.sum(0).A1
         current_S_d = np.sum(np.log(current_degree_sequence[current_degree_sequence >= d_min]))
         current_n = np.sum(current_degree_sequence >= d_min)
         n_start = np.sum(degree_sequence_start >= d_min)
@@ -376,13 +427,7 @@ class ProposedAttack:
         alpha_start = compute_alpha(n_start, S_d_start, d_min)
         log_likelihood_orig = compute_log_likelihood(n_start, alpha_start, S_d_start, d_min)
 
-        # Handle matrix indexing - convert to array if needed
-        edge_values = modified_adj_scipy[tuple(filtered_edges.T)]
-        if hasattr(edge_values, 'toarray'):
-            edge_values = edge_values.toarray()[0]
-        else:
-            edge_values = np.asarray(edge_values).flatten()
-        deltas = 2 * (1 - edge_values) - 1
+        deltas = 2 * (1 - modified_adj[tuple(filtered_edges.T)].toarray()[0] )- 1
         d_edges_old = current_degree_sequence[filtered_edges]
         d_edges_new = current_degree_sequence[filtered_edges] + deltas[:, None]
         new_S_d, new_n = update_Sx(current_S_d, current_n, d_edges_old, d_edges_new, d_min)
@@ -392,12 +437,14 @@ class ProposedAttack:
         new_ll_combined = compute_log_likelihood(new_n + n_start, alphas_combined, new_S_d + S_d_start, d_min)
         new_ratios = -2 * new_ll_combined + 2 * (new_ll + log_likelihood_orig)
 
+        # Do not consider edges that, if added/removed, would lead to a violation of the
+        # likelihood ration Chi_square cutoff value.
         powerlaw_filter = filter_chisquare(new_ratios, ll_cutoff)
         filtered_edges = filtered_edges[powerlaw_filter]
 
-        # Compute new entries in A_hat_square_uv using GPU
-        a_hat_uv_new = compute_new_a_hat_uv_torch(filtered_edges, target_node, modified_adj_torch, adj_norm_torch, nnodes, self.device)
-        
+
+        # Compute new entries in A_hat_square_uv
+        a_hat_uv_new = compute_new_a_hat_uv(filtered_edges, target_node, modified_adj, adj_norm, nnodes)
         # Compute the struct scores for each potential edge
         struct_scores = struct_score(a_hat_uv_new, modified_features @ W, label_u)
         best_edge_ix = struct_scores.argmin()
@@ -406,13 +453,25 @@ class ProposedAttack:
 
         return [best_edge_score, best_edge]
 
+    def get_tained_surrogate_model_accuracy(self, modified_adj, target_node):
+        features = self.data2.features
+        n = self.pyg_data[0].num_nodes
+        modified_adj = modified_adj.t() 
+        modified_adj = sp.csr_matrix((np.ones(modified_adj.shape[1]),
+                                  (modified_adj[0], modified_adj[1])), shape=(n, n))
+        
+        self.surrogate_model.eval()
+        output_modified = self.surrogate_model.predict(features=features, adj=modified_adj)
+        label = output_modified.argmax(1)[target_node]
+        acc_test = self.labels[target_node] == label
+        return acc_test
+
 
     def get_surrogate_model_output(self):
         adj2, features2, labels2 = self.data2.adj, self.data2.features, self.data2.labels
         idx_train2, idx_val2, idx_test2 = self.data2.idx_train, self.data2.idx_val, self.data2.idx_test
         output = None
         model = None
-        
         if self.surrogate == 'gcn':
             gcn = GCN(nfeat=features2.shape[1], nhid=16, nclass=labels2.max().item() + 1, dropout=0.5, device=device)
             gcn = gcn.to(device)
@@ -420,6 +479,8 @@ class ProposedAttack:
             gcn.eval()
             output = gcn.predict()
             model = gcn
+            # print(output)
+            # exit()
         elif self.surrogate == 'gin':
             gin = GIN(nfeat=self.features.shape[1], nhid=8, heads=8, nclass=self.labels.max().item() + 1, dropout=0.5, device=device)
             gin = gin.to(device)
@@ -444,13 +505,42 @@ class ProposedAttack:
                     
         assert output is not None, "Surrogate model should be any one of the listed model: [gcn, gin, gat, graphsage]"
         return model, output
+    
+    def get_degree(self):
+        degree_dict = {}
+        for (u, v) in self.data.edge_index.t():
+            if int(u) in degree_dict:
+                degree_dict[int(u)] += 1
+            else:
+                degree_dict[int(u)] = 1
+        return degree_dict
+    
+    def get_nodes_to_connect_by_distance(self, adj, target_node):
+        G = nx.Graph()
+        G.add_edges_from(adj)
+
+        # Dictionary to store shortest distances for each node
+        shortest_distances = {}
+        label = self.surrogate_model_output.argmax(1)[target_node]
+
+        # Calculate shortest distances for each node in the node list
+        shortest_paths = nx.single_source_dijkstra_path_length(G, target_node)
+        shortest_distances[target_node] = shortest_paths
+        distances_from_specific_node = shortest_distances[target_node]
+        top_nodes_from_specific_node = sorted(distances_from_specific_node.items(), key=lambda x: x[1], reverse=True)
+
+        for node in top_nodes_from_specific_node:
+            return node[0]
 
     def get_nodes_to_connect_by_distance_top_n(self, adj, target_node, N):
         G = nx.Graph()
         G.add_edges_from(adj)
 
+        # Dictionary to store shortest distances for each node
         shortest_distances = {}
+        label = self.surrogate_model_output.argmax(1)[target_node]
 
+        # Calculate shortest distances for each node in the node list
         shortest_paths = nx.single_source_dijkstra_path_length(G, target_node)
         shortest_distances[target_node] = shortest_paths
         distances_from_specific_node = shortest_distances[target_node]
@@ -459,12 +549,15 @@ class ProposedAttack:
         return top_nodes_from_specific_node[:N]
 
     def get_decoded_edge_index_from_GAE(self, threshold):
+        # Normalize node features
         normalizer = T.NormalizeFeatures()
         normalize_data = normalizer(self.data)
 
+        # Apply RandomLinkSplit transformation
         splitter = T.RandomLinkSplit(num_val=0.05, num_test=0.1, is_undirected=True, split_labels=True, add_negative_train_samples=False)
         split_data = splitter(normalize_data)
 
+        # Split data into train, validation, and test sets
         train_data, val_data, test_data = split_data
 
         in_channels, out_channels = self.data.num_features, 16
@@ -478,12 +571,15 @@ class ProposedAttack:
         return decoded_edge_index
 
     def get_decoded_edge_index_from_VGAE(self, threshold):
+        # Normalize node features
         normalizer = T.NormalizeFeatures()
         normalize_data = normalizer(self.data)
 
+        # Apply RandomLinkSplit transformation
         splitter = T.RandomLinkSplit(num_val=0.05, num_test=0.1, is_undirected=True, split_labels=True, add_negative_train_samples=False)
         split_data = splitter(normalize_data)
 
+        # Split data into train, validation, and test sets
         train_data, val_data, test_data = split_data
 
         in_channels, out_channels = self.data.num_features, 16
@@ -506,10 +602,13 @@ class ProposedAttack:
         adj_list_GAE_set = set(tuple(item) for item in adj_list_GAE)
         adj_list_VGAE_set = set(tuple(item) for item in adj_list_VGAE)
 
+        # Find the common elements using the intersection operation
         common_elements = adj_list_GAE_set.intersection(adj_list_VGAE_set)
 
+        # Convert the result back to a list of lists if needed
         common_elements_list = [tuple(item) for item in common_elements]
 
+        # Print the common elements
         return common_elements_list
     
     def get_linearized_weight(self):
@@ -517,7 +616,100 @@ class ProposedAttack:
         W = surrogate.gc1.weight @ surrogate.gc2.weight
         return W.detach().cpu().numpy()
     
+    def get_highest_loss_edge_after_add(self, updated_edges, target_node):
+        updated_edges_tmp = updated_edges.copy()
+        edges_list_before_perturbation = updated_edges_tmp.copy()
+
+        edge_to_add = self.get_nodes_to_connect_by_distance(updated_edges_tmp, target_node)
+        updated_edges_tmp.append([target_node, edge_to_add])
+        # updated_edges_tmp.append([edge_to_add, target_node])
+
+        nclass= self.data2.labels.max().item()+1
+        n = self.pyg_data[0].num_nodes
+        features2 = self.data2.features
+        labels = self.data2.labels
+
+        def get_surrogate_losses(updated_edges_tmp):
+            modified_adj_tmp = torch.tensor(updated_edges_tmp).T
+            modified_adj_2 = sp.csr_matrix((np.ones(modified_adj_tmp.shape[1]),
+                                        (modified_adj_tmp[0], modified_adj_tmp[1])), shape=(n, n))
+            
+            adj_norm = normalize_adj(modified_adj_2)
+
+            modified_features = features2.copy()
+            logits = (adj_norm @ adj_norm @ modified_features @ self.W )[target_node]
+            label_u = labels[target_node]
+            
+            label_target_onehot = np.eye(int(nclass))[labels[target_node]]
+            best_wrong_class = (logits - 1000*label_target_onehot).argmax()
+            surrogate_losses = [logits[labels[target_node]] - logits[best_wrong_class]]
+
+            return surrogate_losses[0]
+
+        def get_score(edges_list_before_perturbation, updated_edges_tmp_2):
+            return get_surrogate_losses(updated_edges_tmp_2) - get_surrogate_losses(edges_list_before_perturbation)
+        
+
+        score = get_score(edges_list_before_perturbation, updated_edges_tmp)
+
+        return updated_edges_tmp, score
+    
+    def get_highest_loss_edge_after_remove(self, final_prune_list, updated_edges, target_node):
+        updated_edges_tmp_2 = updated_edges.copy()
+        
+        final_prune_list_with_loss = [list(val) for val in final_prune_list]
+        for i in range(len(final_prune_list_with_loss)):
+            final_prune_list_with_loss[i].append(float('-inf'))
+
+        nclass= self.data2.labels.max().item()+1
+        n = self.pyg_data[0].num_nodes
+        features2 = self.data2.features
+        labels = self.data2.labels
+
+        def get_surrogate_losses(updated_edges_tmp_2):
+            modified_adj_tmp = torch.tensor(updated_edges_tmp_2).T
+            modified_adj_2 = sp.csr_matrix((np.ones(modified_adj_tmp.shape[1]),
+                                        (modified_adj_tmp[0], modified_adj_tmp[1])), shape=(n, n))
+            
+            adj_norm = normalize_adj(modified_adj_2)
+
+            modified_features = features2.copy()
+            logits = (adj_norm @ adj_norm @ modified_features @ self.W )[target_node]
+            label_u = labels[target_node]
+            
+            label_target_onehot = np.eye(int(nclass))[labels[target_node]]
+            best_wrong_class = (logits - 1000*label_target_onehot).argmax()
+            surrogate_losses = [logits[labels[target_node]] - logits[best_wrong_class]]
+
+            return surrogate_losses[0]
+
+        def get_score(edges_list_before_perturbation, updated_edges_tmp_2):
+            return get_surrogate_losses(updated_edges_tmp_2) - get_surrogate_losses(edges_list_before_perturbation)
+
+        for idx, edge in enumerate(list(final_prune_list)):
+            edges_list_before_perturbation = updated_edges_tmp_2.copy()
+            edge_to_remove_1 = edge
+            edge_to_remove_2 = [edge_to_remove_1[1], edge_to_remove_1[0]]
+            try:
+                updated_edges_tmp_2.remove(edge_to_remove_1)
+            except:
+                pass
+
+            try:
+                updated_edges_tmp_2.remove(edge_to_remove_2)
+            except:
+                pass
+
+            score = get_score(edges_list_before_perturbation, updated_edges_tmp_2)
+
+            final_prune_list_with_loss[idx][2] = score
+            updated_edges_tmp_2 = updated_edges.copy()
+        
+        sorted_list = sorted(final_prune_list_with_loss, key=lambda x: x[2], reverse=True)
+        return sorted_list
+    
     def attack(self, target_node, n_perturbations, isBoth=1, isAdd=0, isRemove=0):
+        global add_remove_stat
         assert self.important_edge_list is not None, "Create the important_edge_list first by calling get_important_edge_list function."
 
         G = nx.Graph()
@@ -537,27 +729,25 @@ class ProposedAttack:
         updated_edges = self.adj.tolist()  
          
         adj2, features2, labels2 = self.data2.adj, self.data2.features, self.data2.labels
-        
-        # Convert to PyTorch sparse tensors on GPU
-        modified_adj_torch = scipy_to_torch_sparse(adj2, self.device)
-        ori_adj_scipy = adj2.copy()
-        
+        # modified_adj = adj2.copy().tolil()
+        modified_adj = lil_matrix(adj2.copy())
         if isinstance(features2, np.ndarray):
             features2 = sp.csr_matrix(features2)
-        
+        # print(features2)
+        # print(type(features2))
+        ori_adj = modified_adj.copy()
         modified_features = features2.copy().tolil()
-        adj_norm_torch = normalize_adj_torch(modified_adj_torch, self.device)
+        adj_norm = normalize_adj(modified_adj)
         nnodes = adj2.shape[0]
 
         if len(final_prune_list) == 0:
             final_prune_list = np.column_stack((np.tile(target_node, nnodes-1), np.setdiff1d(np.arange(nnodes), target_node)))
 
         final_prune_list = np.array(final_prune_list).astype("int32")
+
         final_prune_list = final_prune_list[:100]
         
-        # Use scipy for singleton filtering
-        modified_adj_scipy_for_filter = torch_sparse_to_scipy(modified_adj_torch)
-        singleton_filter = filter_singletons(final_prune_list, modified_adj_scipy_for_filter)
+        singleton_filter = filter_singletons(final_prune_list, modified_adj)
         final_prune_list = final_prune_list[singleton_filter]
 
         if len(final_prune_list) < n_perturbations:
@@ -565,18 +755,21 @@ class ProposedAttack:
                 if (u == target_node or v == target_node) and ((u, v) not in final_prune_list) and ((v, u) not in final_prune_list):
                     if degree[u] <= 1 or degree[v] <= 1:
                         continue
-                    final_prune_list = np.append(final_prune_list, [[u, v]], axis=0)
+                    final_prune_list.append([u, v])
                     if len(final_prune_list) > n_perturbations:
                         break
+        
+        # final_prune_list_tmp = np.array(final_prune_list.copy()).astype("int32")
 
         n_add = max(len(final_prune_list), n_perturbations) 
 
         potential_edges_add = self.get_nodes_to_connect_by_distance_top_n(updated_edges, target_node, n_add)
         potential_edges_add = [[target_node, node[0]] for node in potential_edges_add]
+        # print(potential_edges_add)
 
         potential_edges_remove = [node for edge in final_prune_list for node in edge if node != target_node]
         potential_edges_remove = [[target_node, node] for node in potential_edges_remove]
-        
+        # print(potential_edges_remove)
         potential_edges_final = potential_edges_remove + potential_edges_add
         potential_edges_final = np.array(potential_edges_final).astype("int32")
 
@@ -584,42 +777,29 @@ class ProposedAttack:
             potential_edges = np.column_stack((np.tile(target_node, nnodes-1), np.setdiff1d(np.arange(nnodes), target_node)))
             potential_edges_final = np.concatenate((potential_edges_final, potential_edges))
 
-        modified_adj_scipy_for_filter = torch_sparse_to_scipy(modified_adj_torch)
-        singleton_filter = filter_singletons(potential_edges_final, modified_adj_scipy_for_filter)
+        # print(potential_edges_final)
+        singleton_filter = filter_singletons(potential_edges_final, modified_adj)
+        # print(singleton_filter)
         potential_edges_final = potential_edges_final[singleton_filter] if np.any(singleton_filter) else potential_edges_final
+        # print(potential_edges_final)
 
+        
         label_u = labels2[target_node]
         cnt_add = 0
         cnt_remove = 0
 
         print(f"Total potential edges: {len(potential_edges_final)}")
 
+        # if len(potential_edges_final) < n_perturbations:
+
         while n_perturbations:
-            best_edge_score, best_edge = self.get_scores_and_egdes(
-                potential_edges_final, modified_features, target_node, self.W, 
-                label_u, modified_adj_torch, ori_adj_scipy, adj_norm_torch, nnodes
-            )
+            best_edge_score, best_edge = self.get_scores_and_egdes(potential_edges_final, modified_features, target_node, self.W, label_u, modified_adj, ori_adj, adj_norm, nnodes)
 
-            # Update adjacency matrix on GPU
-            modified_adj_torch = modified_adj_torch.coalesce()
-            indices = modified_adj_torch.indices()
-            values = modified_adj_torch.values()
-            
-            # Check if edge exists
-            edge_exists = False
-            ori_adj_scipy_check = torch_sparse_to_scipy(modified_adj_torch)
-            if ori_adj_scipy_check[best_edge[0], best_edge[1]]:
-                edge_exists = True
-            
-            # Convert to COO for modification
-            modified_adj_coo = torch_sparse_to_scipy(modified_adj_torch).tolil()
-            modified_adj_coo[tuple(best_edge)] = modified_adj_coo[tuple(best_edge[::-1])] = 1 - modified_adj_coo[tuple(best_edge)]
-            modified_adj_torch = scipy_to_torch_sparse(modified_adj_coo, self.device)
-            
-            adj_norm_torch = normalize_adj_torch(modified_adj_torch, self.device)
-            nnodes = modified_adj_torch.shape[0]
+            modified_adj[tuple(best_edge)] = modified_adj[tuple(best_edge[::-1])] = 1 - modified_adj[tuple(best_edge)]
+            adj_norm = normalize_adj(modified_adj)
+            nnodes = modified_adj.shape[0]
 
-            if edge_exists:
+            if adj2[best_edge[0], best_edge[1]]:
                 msg = "Removed"  
                 cnt_remove += 1
             else: 
@@ -627,7 +807,9 @@ class ProposedAttack:
                 cnt_add += 1
 
             print(f"{msg} best_edge_score: {best_edge_score}, best_edge: {best_edge}")
-            
+            # potential_edges_final.remove(best_edge)
+            # potential_edges_final = potential_edges_final[~np.all(potential_edges_final == best_edge, axis=1)]
+            # potential_edges_final = potential_edges_final[~np.all(potential_edges_final == best_edge[::-1], axis=1)]
             mask1 = ~np.all(potential_edges_final == best_edge, axis=1)
             mask2 = ~np.all(potential_edges_final == best_edge[::-1], axis=1)
             potential_edges_final = potential_edges_final[mask1 & mask2]
@@ -637,12 +819,12 @@ class ProposedAttack:
         print(f"added: {cnt_add}, removed: {cnt_remove}")
         logger.info(f"added: {cnt_add}, removed: {cnt_remove}")
 
-        # Convert back to scipy for prediction
-        modified_adj_final = torch_sparse_to_scipy(modified_adj_torch)
-        return modified_adj_final
+        return modified_adj
     
     def predict(self, modified_adj, target_node):
+        
         predict_inner = predict_classes[self.defense_model]
+
         return predict_inner(modified_adj, self.data2.features, self.data2, target_node)
 
 def get_important_edge_list_for_precompute(surrogate_model, dataset, defense_model, threshold):
@@ -656,11 +838,13 @@ def start_attack_proposed_model(surrogate_model, dataset, defense_model, budget_
 
     global add_remove_stat
     add_remove_stat = collections.defaultdict(lambda : 0)
-    start_budget = 1
+    start_budget = 1 ## this will be the function parameter (code cleaning is not done yet.)
 
+    # Load the dictionary from the JSON file
     with open('./important_edge_list.json', 'r') as json_file:
         important_edge_list_dict = json.load(json_file)
 
+    # Convert lists back to tuples
     important_edge_list = [tuple(item) for item in important_edge_list_dict[dataset]]
 
     already_misclassified = set()
@@ -683,13 +867,9 @@ def start_attack_proposed_model(surrogate_model, dataset, defense_model, budget_
                 logger.info(f"already misclassified...")
                 continue
 
-            # Clear GPU cache before each attack
-            if torch.cuda.is_available():
-                torch.cuda.empty_cache()
-
             proposed_model = ProposedAttack(surrogate_model, dataset, defense_model, important_edge_list)
             modified_adj = proposed_model.attack(target_node=target_node, n_perturbations=budget)
-            
+            # print("haha!..")
             end_time = time.time()
             
             accuracy = proposed_model.predict(modified_adj, target_node)
@@ -702,9 +882,11 @@ def start_attack_proposed_model(surrogate_model, dataset, defense_model, budget_
             else:
                 curr_acc[1].append(target_node)
         
+        
         running_time_seconds = end_time - start_time
         running_time_minutes, running_time_seconds = convert_time(running_time_seconds)
         print(f"running_time: {int(running_time_minutes)} minutes, {running_time_seconds} seconds")
+
 
         acc_node[budget] = curr_acc
         acc_list.append([budget, cnt / len(node_list), node_list])
@@ -717,21 +899,81 @@ def start_attack_proposed_model(surrogate_model, dataset, defense_model, budget_
     
     root_dir = f"result_{dataset}_{defense_model}"
     os.makedirs(root_dir, exist_ok=True)
-    df.to_csv(f'{root_dir}/proposed_model_{dataset}_{defense_model}_{times}.csv')
+    df.to_csv(f'{root_dir}/proposed_model_{dataset}_{defense_model}_{times}.csv') ## please change the number accordingly 
 
     with open(f"{root_dir}/add_remove_stat_proposed_model_{dataset}_{defense_model}_{times}.json", 'w', encoding='utf-8') as json_file:
         json.dump(add_remove_stat, json_file, indent=4, ensure_ascii=False)
 
     print("done...............")
+    # # Create two line charts for col1 and col2
+    # plt.figure(figsize=(8, 6))
+
+    # # Line chart for col1
+    # plt.plot(df['budget_number'], df['miss-classification_modified'], label='Modified Adj', marker='o', markersize=5, linestyle='-')
+
+    # # plt.ylim(bottom=0.10, top=0.50)
+
+    # # Add labels and a legend
+    # plt.xlabel('target_number') 
+    # plt.ylabel('miss-classification')
+    # plt.title(f'proposed_model_{dataset}_{defense_model}_{times}')
+    # plt.legend()
+
+    # # Show the plot
+    # plt.grid(True)
+    # plt.savefig(f'{root_dir}/proposed_model_{dataset}_{defense_model}_{times}.png')
+    # # plt.show()
+
 
 if __name__ == "__main__": 
+
+    '''
+    Issues:
+    1. model can assume the class is false but after the modification, for new graph representation it can be true, although all the budgets are not used yet. It can be possible if we use all the budget then it may really return false. since the model is trained on original graph, it is very likely to happend. 
+
+    '''
+
     surrogate_model = 'gcn'
     dataset = 'blogcatalog'
     defense_model = 'gin'
 
     data = get_dataset_from_deeprobust(dataset=dataset)
+    # print("Dataset loaded...")
     budget_range = 7
 
+    # node_list = [929, 1342, 1554, 1255, 2406, 1163, 1340, 2077, 1347, 1820, 429, 1267, 1068, 1223, 1330, 1959, 2469, 1343, 1070, 2355, 1829, 482, 2035, 615, 1441, 23, 582, 875, 1309, 2256, 2396, 2228, 336, 463, 2142, 603, 2423, 2109, 846, 117]
     node_list = get_target_node_list(data)
-  
+    # node_list = [87, 1067, 1322, 1037, 1486, 1168, 833, 1681, 1997, 1316, 3334, 4595, 3989, 5099, 5069, 4777, 3929, 3261, 3573, 2857, 2649, 645, 2608, 1257, 1151, 4286, 1785, 3551, 942, 2985, 2011, 1819, 4803, 2612, 438, 2862, 742, 681, 299, 1743]
+    # node_list = [1079,]
+    # print("Targegt nodes are being selected...")
+
     start_attack_proposed_model(surrogate_model, dataset, defense_model, budget_range, node_list)
+
+    # dataset_list = ['cora', 'citeseer', 'polblogs']
+    # important_edge_list_dict = {}
+    # for dataset in dataset_list:
+    #     important_edge_list = get_important_edge_list_for_precompute(surrogate_model, dataset, defense_model)
+    #     important_edge_list_dict[dataset] = important_edge_list
+    #     important_edge_list_dict[dataset] = [list(item) for item in important_edge_list_dict[dataset]]
+
+    # # Save the dictionary to a JSON file
+    # with open('./important_edge_list.json', 'w') as json_file:
+    #     json.dump(important_edge_list_dict, json_file, indent=4)
+
+    # dataset = 'ogbn-arxiv'
+    # important_edge_list_dict = json.load(open('./important_edge_list.json', 'r', encoding='utf-8'))
+    # important_edge_list = get_important_edge_list_for_precompute(surrogate_model, dataset, defense_model)
+    # important_edge_list_dict[dataset] = important_edge_list
+    # important_edge_list_dict[dataset] = [list(item) for item in important_edge_list_dict[dataset]]
+
+    # with open('./important_edge_list.json', 'w') as json_file:
+    #     json.dump(important_edge_list_dict, json_file, indent=4)
+
+
+
+    
+
+
+
+
+

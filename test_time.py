@@ -2,7 +2,7 @@
 
 
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = f"1"
+# os.environ["CUDA_VISIBLE_DEVICES"] = f"1"
 
 import time
 import json
